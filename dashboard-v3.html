@@ -260,7 +260,7 @@ body { display: flex; flex-direction: column; height: 100vh; background: #F8F7FF
         <div class="section-label">Perangkat Lainnya</div>
         <div class="module-grid">
 
-            <div class="module-btn gated" onclick="showModule('prosem')">
+            <div class="module-btn gated" onclick="bukaProsem()">
                 <div class="module-icon" style="background:linear-gradient(135deg,#F0F9FF,#BAE6FD);">📅</div>
                 <div class="module-body"><div class="module-title">Prosem</div><div class="module-sub">Program Semester</div></div>
                 <div class="module-arrow">→</div>
@@ -342,7 +342,7 @@ const HALAMAN = {            // ← satu-satunya tempat nama file halaman; ubah 
     biodata:   'biodata-v6.html',
     dashboard: 'dashboard-v3.html',
     selector:  'cptp-selector-v4.html',
-    hub:       'hub.html',
+    prosem:    'prosem.html',
 };
 
 if (localStorage.getItem('ciptaguru_logged_in') !== 'true' || !localStorage.getItem('ciptaguru_user_id')) {
@@ -413,6 +413,14 @@ function butuhBiodata() {
 function bukaSelector() {
     if (butuhBiodata()) return;
     window.location.href = HALAMAN.selector;
+}
+
+// Prosem -> kalau materi sudah dipilih langsung buka, kalau belum pilih materi dulu
+function bukaProsem() {
+    if (butuhBiodata()) return;
+    let p = {};
+    try { p = JSON.parse(localStorage.getItem('ciptaguru_bab_pilihan') || '{}'); } catch (e) {}
+    window.location.href = (p && p.mapel_slug && p.kelas) ? HALAMAN.prosem : HALAMAN.selector + '?tujuan=prosem';
 }
 
 function showModule(id) {
