@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cipta Guru — Dokumen Pembelajaran</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Bricolage+Grotesque:wght@700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:#F8F7FF;color:#0F172A;-webkit-font-smoothing:antialiased;min-height:100vh;}
+.top{background:white;border-bottom:1px solid #E5E3F0;padding:12px 24px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;position:sticky;top:0;z-index:20;}
+.back{font-size:.75rem;font-weight:700;color:#4F46E5;cursor:pointer;white-space:nowrap;}
+.ctx{flex:1;min-width:220px;}
+.ctx b{font-family:'Bricolage Grotesque',sans-serif;font-size:1rem;display:block;line-height:1.2;}
+.ctx span{font-size:.7rem;color:#94a3b8;}
+.bab{display:flex;align-items:center;gap:8px;font-size:.7rem;font-weight:700;color:#64748B;}
+.bab select{padding:8px 12px;border-radius:10px;border:1.5px solid #E5E3F0;font:600 .78rem 'Plus Jakarta Sans';color:#0F172A;background:white;max-width:260px;}
+.tabs{display:flex;gap:8px;padding:16px 24px 0;overflow-x:auto;max-width:1000px;margin:0 auto;}
+.tab{flex:1;min-width:112px;border:1.5px solid #E5E3F0;background:white;border-radius:14px;padding:10px 12px;cursor:pointer;display:flex;align-items:center;gap:9px;transition:all .18s;font-family:inherit;text-align:left;}
+.tab:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(79,70,229,.1);}
+.tab .ic{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.05rem;flex-shrink:0;}
+.tab .nm{font:800 .82rem 'Bricolage Grotesque';line-height:1.1;}
+.tab .sb{font-size:.58rem;color:#94a3b8;margin-top:2px;}
+.tab.active{border-color:var(--c);background:var(--bg);box-shadow:0 6px 18px rgba(79,70,229,.14);}
+.tab .ck{margin-left:auto;font-size:.8rem;display:none;}
+.tab.done .ck{display:block;}
+.bar{max-width:1000px;margin:14px auto 0;padding:0 24px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:11px;border:1.5px solid #E5E3F0;background:white;font:700 .76rem 'Plus Jakarta Sans';color:#374151;cursor:pointer;transition:all .18s;}
+.btn:hover{border-color:#818CF8;color:#4F46E5;background:#EEF2FF;}
+.btn.pri{background:linear-gradient(135deg,#4F46E5,#7C3AED);color:white;border:none;box-shadow:0 4px 14px rgba(79,70,229,.35);}
+.btn.pri:hover{color:white;transform:translateY(-1px);}
+.btn[disabled]{opacity:.4;cursor:not-allowed;pointer-events:none;}
+.btn.on{background:#ECFDF5;border-color:#10B981;color:#047857;}
+.prog{margin-left:auto;font-size:.72rem;font-weight:700;color:#4F46E5;background:#EEF2FF;border:1px solid #C7D2FE;border-radius:20px;padding:6px 14px;}
+.stage{padding:18px 24px 60px;display:flex;justify-content:center;}
+.sheet{width:794px;max-width:100%;background:white;box-shadow:0 10px 40px rgba(15,23,42,.12);padding:44px 48px;font-family:'Plus Jakarta Sans','Segoe UI',Calibri,Arial,sans-serif;font-size:10.5pt;line-height:1.6;color:#1E293B;border-radius:4px;min-height:300px;}
+.sheet[contenteditable=true]{outline:3px dashed #10B981;outline-offset:6px;}
+.kop{border-bottom:3px double #111;padding-bottom:10px;margin-bottom:14px;text-align:center;}
+.kop .a{font-family:'Bricolage Grotesque','Plus Jakarta Sans',sans-serif;font-weight:800;font-size:14pt;letter-spacing:.3px;}
+.kop .b{font-size:9.5pt;color:#475569;}
+.doc-title{text-align:center;font-family:'Bricolage Grotesque','Plus Jakarta Sans',sans-serif;font-weight:800;font-size:13.5pt;letter-spacing:.2px;margin:6px 0 2px;text-transform:uppercase;}
+.doc-sub{text-align:center;font-size:11pt;margin-bottom:12px;}
+.ident{width:100%;margin-bottom:12px;font-size:10.5pt;}
+.ident td{padding:1px 4px;vertical-align:top;border:none;}
+.ident td:first-child{width:150px;}
+.ident td:nth-child(2){width:12px;}
+table.data{width:100%;border-collapse:collapse;font-size:9pt;line-height:1.5;margin-bottom:12px;}
+table.data th,table.data td{border:1px solid #94A3B8;padding:5px 6px;vertical-align:top;}
+table.data th{background:#EEF2FF;text-align:center;font-weight:700;}
+table.data td.c{text-align:center;}
+table.data tr.hl td{background:#FEF9C3;}
+h4{font-family:'Bricolage Grotesque','Plus Jakarta Sans',sans-serif;font-weight:800;font-size:11pt;margin:14px 0 4px;color:#0F172A;}
+.sec{margin-bottom:8px;}
+.box{border:1px solid #333;padding:8px 10px;margin:4px 0 10px;}
+.lines div{border-bottom:1px dotted #555;height:24px;}
+.ttd{display:flex;justify-content:space-between;margin-top:30px;font-size:10.5pt;text-align:center;}
+.ttd div{width:44%;}
+.ttd .sp{height:62px;}
+ol,ul{padding-left:20px;}
+.note-gen{font-family:'Plus Jakarta Sans';font-size:.66rem;color:#92400E;background:#FFFBEB;border:1px dashed #FDE68A;border-radius:8px;padding:6px 10px;margin-bottom:12px;}
+.state{text-align:center;padding:60px 20px;color:#64748B;font-size:.9rem;line-height:1.7;}
+.state b{display:block;font-size:1.05rem;color:#0F172A;margin-bottom:6px;}
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(30px);background:#0F172A;color:white;padding:11px 20px;border-radius:12px;font-size:.78rem;font-weight:600;opacity:0;transition:all .3s;z-index:50;pointer-events:none;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.confetti{position:fixed;top:-12px;font-size:1.3rem;z-index:60;pointer-events:none;animation:fall 2.4s ease-in forwards;}
+@keyframes fall{to{transform:translateY(110vh) rotate(540deg);opacity:.9;}}
+.modal{position:fixed;inset:0;background:rgba(15,23,42,.55);display:none;align-items:center;justify-content:center;z-index:70;padding:16px;}
+.modal.show{display:flex;}
+.modal .card{background:white;border-radius:16px;padding:22px 22px 18px;width:460px;max-width:100%;max-height:92vh;overflow:auto;}
+.modal h3{font:800 1.05rem 'Bricolage Grotesque';margin-bottom:4px;}
+.modal p{font-size:.72rem;color:#64748B;margin-bottom:12px;line-height:1.5;}
+.modal label{display:block;font-size:.68rem;font-weight:700;color:#475569;margin:10px 0 4px;}
+.modal input{width:100%;padding:9px 11px;border:1.5px solid #E5E3F0;border-radius:10px;font:500 .82rem 'Plus Jakarta Sans';}
+.modal .act{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;}
+@media (max-width:820px){.sheet{padding:22px 16px;font-size:10.5pt;}.top{padding:10px 14px}.tabs,.bar,.stage{padding-left:12px;padding-right:12px}.prog{margin-left:0}}
+@media print{
+  @page{size:A4;margin:14mm;}
+  body{background:white;}
+  .top,.tabs,.bar,.toast,.confetti,.note-gen,.modal{display:none!important;}
+  .stage{padding:0;display:block;}
+  .sheet{box-shadow:none;width:100%;padding:0;border-radius:0;outline:none!important;}
+}
+</style>
+</head>
+<body>
+<div class="top">
+  <a class="back" onclick="location.href=HALAMAN.selector">← Ganti Materi</a>
+  <a class="back" onclick="location.href=HALAMAN.dashboard">🏠 Dashboard</a>
+  <div class="ctx"><b id="ctx-title">Memuat…</b><span id="ctx-sub">—</span></div>
+  <div class="bab"><label for="bab">Bab</label><select id="bab"></select></div>
+</div>
+
+<div class="tabs" id="tabs"></div>
+<div class="bar">
+  <button class="btn pri" onclick="unduh('pdf')">⬇ PDF / Cetak</button>
+  <button class="btn" onclick="unduh('doc')">📄 Word</button>
+  <button class="btn" id="b-xls" onclick="unduh('xls')">📊 Excel</button>
+  <button class="btn" id="b-edit" onclick="toggleEdit()">✏️ Edit</button>
+  <button class="btn" onclick="bukaKop()">⚙️ Data Kop &amp; Tanda Tangan</button>
+  <span class="prog" id="prog">0 dari 6 dokumen siap</span>
+</div>
+<div class="stage"><div class="sheet" id="sheet"><div class="state"><b>Memuat dokumen…</b>Mengambil data dari server.</div></div></div>
+<div class="toast" id="toast"></div>
+
+<div class="modal" id="modal-kop">
+  <div class="card">
+    <h3>Data Kop &amp; Tanda Tangan</h3>
+    <p>Diisi sekali, tersimpan di biodatamu, lalu otomatis dipakai di semua dokumen.</p>
+    <label>Nama satuan pendidikan</label><input id="k-satuan" placeholder="contoh: PKBM Tanda Genap">
+    <label>Alamat satuan pendidikan</label><input id="k-alamat" placeholder="contoh: Jl. Contoh No. 1, Jakarta">
+    <label>Kota (untuk tanggal tanda tangan)</label><input id="k-kota" placeholder="contoh: Jakarta">
+    <label>Nama kepala satuan (beserta gelar)</label><input id="k-kepala" placeholder="contoh: Nama Kepala, M.Pd.">
+    <label>NIP kepala satuan (boleh dikosongkan)</label><input id="k-kepala-nip" placeholder="NIP">
+    <div class="act"><button class="btn" onclick="tutupKop()">Batal</button><button class="btn pri" onclick="simpanKop()">Simpan</button></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+const _sb = (typeof supabase !== 'undefined')
+  ? supabase.createClient('https://geabugomvgsgemlmxggx.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlYWJ1Z29tdmdzZ2VtbG14Z2d4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYwNzU1NTgsImV4cCI6MjEwMTY1MTU1OH0.1dReCnfV-u45mqo1__AD7NNwjRQUWuPzV3WX1RRliZE') : null;
+
+const HALAMAN = {            // ← nama file halaman; ubah di sini kalau berganti
+  index:     'index.html',
+  biodata:   'biodata-v6.html',
+  dashboard: 'dashboard-v3.html',
+  selector:  'cptp-selector-v4.html',
+};
+if (localStorage.getItem('ciptaguru_logged_in') !== 'true' || !localStorage.getItem('ciptaguru_user_id')) location.href = HALAMAN.index;
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+// teks bernomor "1) ... 2) ..." -> baris baru per nomor
+const fmt = s => esc(s).replace(/\s+(?=\d+\)\s)/g, '<br>');
+const TAHUN = (() => { const d = new Date(), y = d.getFullYear(); return d.getMonth() + 1 >= 7 ? `${y}/${y+1}` : `${y-1}/${y}`; })();
+
+let pilihan = {};
+try { pilihan = JSON.parse(localStorage.getItem('ciptaguru_bab_pilihan') || '{}'); } catch (e) {}
+let D = null;                 // data kurikulum dari Supabase
+let G = {};                   // data guru + kop
+let aktif = 'cp', babNo = 1, selesai = new Set(), edit = false;
+
+const TABS = [
+  {id:'cp',   nm:'CP',   sb:'Capaian',      ic:'📘', c:'#4F46E5', bg:'#EEF2FF', tabel:false},
+  {id:'tp',   nm:'TP',   sb:'Tujuan',       ic:'📗', c:'#059669', bg:'#ECFDF5', tabel:true},
+  {id:'atp',  nm:'ATP',  sb:'Alur Tujuan',  ic:'🧭', c:'#0284C7', bg:'#F0F9FF', tabel:true},
+  {id:'rpp',  nm:'RPP',  sb:'Modul Ajar',   ic:'📋', c:'#EA580C', bg:'#FFF7ED', tabel:false},
+  {id:'lkpd', nm:'LKPD', sb:'Lembar Kerja', ic:'📝', c:'#E11D48', bg:'#FFF1F2', tabel:false},
+  {id:'kktp', nm:'KKTP', sb:'Kriteria',     ic:'✅', c:'#7C3AED', bg:'#F5F3FF', tabel:true},
+];
+
+// ── Muat data ────────────────────────────────────
+function tampilPesan(judul, isi) {
+  $('sheet').innerHTML = `<div class="state"><b>${esc(judul)}</b>${isi}</div>`;
+}
+async function muat() {
+  if (!pilihan.mapel_slug || !pilihan.kelas) {
+    $('ctx-title').textContent = 'Belum ada materi dipilih';
+    tampilPesan('Belum ada materi dipilih', 'Silakan pilih mata pelajaran dan kelas terlebih dahulu.<br><br><button class="btn pri" onclick="location.href=HALAMAN.selector">Pilih Materi →</button>');
+    return;
+  }
+  if (!_sb) { tampilPesan('Koneksi gagal', 'Pustaka Supabase tidak termuat. Periksa koneksi internet lalu muat ulang halaman.'); return; }
+  const m = pilihan.mapel_slug, k = pilihan.kelas, uid = localStorage.getItem('ciptaguru_user_id');
+  const q = t => _sb.from(t).select('*').eq('mapel_slug', m).eq('kelas', k);
+  try {
+    const [mk, cp, tp, atp, rpp, lkpd, kktp, guru] = await Promise.all([
+      _sb.from('mapel_kelas').select('*').eq('mapel_slug', m).eq('kelas', k).maybeSingle(),
+      q('cp').order('urutan'), q('tp').order('urutan'), q('atp').order('urutan'),
+      q('rpp'), q('lkpd'), q('kktp'),
+      _sb.from('teachers').select('*').eq('id', uid).maybeSingle(),
+    ]);
+    for (const r of [mk, cp, tp, atp, rpp, lkpd, kktp]) if (r.error) throw r.error;
+    if (!mk.data || !tp.data.length) {
+      $('ctx-title').textContent = `${pilihan.mapel_nama || m} — Kelas ${k}`;
+      tampilPesan('Konten belum tersedia', 'Materi untuk mapel dan kelas ini belum ditambahkan. Akan ditambahkan bertahap.<br><br><button class="btn pri" onclick="location.href=HALAMAN.selector">← Pilih Materi Lain</button>');
+      return;
+    }
+    const byKode = rows => Object.fromEntries(rows.map(r => [r.tp_kode, r]));
+    D = { meta: mk.data, cp: cp.data, tp: tp.data, atp: atp.data, rpp: byKode(rpp.data), lkpd: byKode(lkpd.data), kktp: byKode(kktp.data) };
+    const g = (guru && guru.data) || {};
+    const nama = [g.gelar_depan, g.nama_lengkap, g.gelar_belakang].filter(Boolean).join(' ').replace(/\s+,/g, ',') || localStorage.getItem('ciptaguru_teacher_name') || 'Nama Guru';
+    G = { id: uid, nama, nip: g.nip || '', satuan: g.satuan_nama || '', alamat: g.satuan_alamat || '', kota: g.kota || '', kepala: g.kepala_nama || '', kepalaNip: g.kepala_nip || '' };
+  } catch (err) {
+    console.error(err);
+    tampilPesan('Gagal memuat data', 'Terjadi kendala saat mengambil data. Periksa koneksi internet lalu muat ulang halaman.<br><small>' + esc(err.message || '') + '</small>');
+    return;
+  }
+  const babs = babList();
+  babNo = babs.some(b => b[0] === +pilihan.bab_no) ? +pilihan.bab_no : babs[0][0];
+  $('bab').innerHTML = babs.map(([n, j]) => `<option value="${n}">Bab ${n}: ${esc(j)}</option>`).join('');
+  $('bab').value = babNo;
+  $('bab').onchange = e => { babNo = +e.target.value; render(); };
+  $('ctx-title').textContent = `${D.meta.nama} — Kelas ${D.meta.kelas}`;
+  $('ctx-sub').textContent = `Paket ${D.meta.paket} · Fase ${D.meta.fase} · Tahun Ajaran ${TAHUN}`;
+  document.title = `Cipta Guru — ${D.meta.nama_pendek || D.meta.nama} Kelas ${D.meta.kelas}`;
+  render();
+}
+const babList = () => [...new Map(D.tp.map(t => [t.bab_no, t.bab_judul])).entries()];
+
+// ── Tab bar ──────────────────────────────────────
+function renderTabs() {
+  $('tabs').innerHTML = TABS.map(t => `
+    <button class="tab ${t.id===aktif?'active':''} ${selesai.has(t.id)?'done':''}" style="--c:${t.c};--bg:${t.bg}" onclick="pilih('${t.id}')">
+      <div class="ic" style="background:${t.bg}">${t.ic}</div>
+      <div><div class="nm">${t.nm}</div><div class="sb">${t.sb}</div></div><span class="ck">✅</span>
+    </button>`).join('');
+  $('prog').textContent = `${selesai.size} dari 6 dokumen siap` + (selesai.size === 6 ? ' 🎉' : '');
+  $('b-xls').disabled = !TABS.find(t => t.id === aktif).tabel;
+  $('b-xls').title = $('b-xls').disabled ? 'Dokumen ini berupa teks, bukan tabel — gunakan PDF atau Word' : '';
+}
+function pilih(id) { aktif = id; if (edit) toggleEdit(); render(); }
+
+// ── Bagian dokumen ───────────────────────────────
+const satuanNama = () => (G.satuan || ((pilihan.satuan || 'PKBM / SKB') + ' — NAMA SATUAN PENDIDIKAN')).toUpperCase();
+const kop = () => `<div class="kop"><div class="a">${esc(satuanNama())}</div><div class="b">${esc(G.alamat || 'Alamat satuan pendidikan · Kota/Kabupaten')}</div></div>`;
+const ident = rows => `<table class="ident">${rows.map(([a,b]) => `<tr><td>${a}</td><td>:</td><td>${b}</td></tr>`).join('')}</table>`;
+const ttd = () => `<div class="ttd"><div>Mengetahui,<br>Kepala Satuan Pendidikan<div class="sp"></div><b>${esc(G.kepala || '(................................)')}</b>${G.kepalaNip ? '<br>NIP. ' + esc(G.kepalaNip) : ''}</div><div>${esc(G.kota || 'Kota')}, ........................ ${new Date().getFullYear()}<br>Guru Mata Pelajaran<div class="sp"></div><b>${esc(G.nama)}</b>${G.nip ? '<br>NIP. ' + esc(G.nip) : ''}</div></div>`;
+const head = (judul, sub) => kop() + `<div class="doc-title">${judul}</div><div class="doc-sub">${sub || ''}</div>`;
+const idMapel = () => [['Mata Pelajaran', esc(D.meta.nama)], ['Kelas / Fase', `${D.meta.kelas} / ${D.meta.fase} (Paket ${D.meta.paket})`], ['Tahun Ajaran', TAHUN], ['Guru', esc(G.nama)]];
+const babInfo = () => babs0().find(b => b[0] === babNo) || babs0()[0];
+const babs0 = () => babList();
+const tpBab = () => D.tp.filter(t => t.bab_no === babNo);
+const atpBab = () => D.atp.find(a => a.bab_no === babNo) || {};
+const catatanDraf = msg => `<div class="note-gen">${msg}</div>`;
+const adaDraf = () => Object.values(D.rpp).concat(Object.values(D.lkpd), Object.values(D.kktp)).some(r => r.sumber === 'draf-claude');
+const DRAF = 'Isi dokumen ini adalah <b>draf awal</b>. Periksa dan sesuaikan dengan buku, kondisi kelas, dan peserta didikmu (tombol ✏️ Edit).';
+
+const VIEW = {
+  cp() {
+    return head('Capaian Pembelajaran (CP)', `Fase ${D.meta.fase} — Kelas ${D.meta.kelas}`) + ident(idMapel()) +
+    `<table class="data"><thead><tr><th style="width:30px">No.</th><th style="width:130px">Elemen</th><th>Capaian Pembelajaran</th></tr></thead><tbody>` +
+    D.cp.map((c, i) => `<tr><td class="c">${i+1}</td><td><b>${esc(c.elemen)}</b>${c.deskripsi_elemen ? `<br><i style="font-size:8.5pt">${esc(c.deskripsi_elemen)}</i>` : ''}</td><td>${esc(c.cp_teks)}</td></tr>`).join('') + `</tbody></table>` + ttd();
+  },
+  tp() {
+    return head('Tujuan Pembelajaran (TP)', `Kelas ${D.meta.kelas} — Fase ${D.meta.fase}`) + ident(idMapel()) +
+    catatanDraf('Baris berwarna kuning = bab yang sedang kamu pilih.') +
+    `<table class="data"><thead><tr><th>No.</th><th>Smt</th><th>Bab</th><th>Elemen</th><th>Kode</th><th>Tujuan Pembelajaran</th><th>JP</th></tr></thead><tbody>` +
+    D.tp.map((t, i) => `<tr class="${t.bab_no===babNo?'hl':''}"><td class="c">${i+1}</td><td class="c">${t.semester}</td><td>${t.bab_no}. ${esc(t.bab_judul)}</td><td>${esc(t.elemen)}</td><td class="c">${esc(t.tp_kode)}</td><td>${esc(t.tp_teks)}</td><td class="c">${t.jp ?? ''}</td></tr>`).join('') + `</tbody></table>` + ttd();
+  },
+  atp() {
+    return head('Alur Tujuan Pembelajaran (ATP)', `Kelas ${D.meta.kelas} — Fase ${D.meta.fase}`) + ident(idMapel()) +
+    `<table class="data"><thead><tr><th>No.</th><th>Smt</th><th>Bab / Topik</th><th>Kode TP</th><th>Alur Tujuan Pembelajaran</th><th>Profil</th><th>Asesmen</th><th>JP</th></tr></thead><tbody>` +
+    D.atp.map((a, i) => `<tr class="${a.bab_no===babNo?'hl':''}"><td class="c">${i+1}</td><td class="c">${a.semester}</td><td>Bab ${a.bab_no}: ${esc(a.bab_judul)}</td><td class="c">${esc(a.tp_rentang)}</td><td>${esc(a.atp_teks)}</td><td>${esc(a.profil)}</td><td>${esc(a.asesmen)}</td><td class="c">${a.jp ?? ''}</td></tr>`).join('') + `</tbody></table>` + ttd();
+  },
+  kktp() {
+    const [n, j] = babInfo(), tps = tpBab();
+    const kt = D.kktp;
+    return head('Kriteria Ketercapaian Tujuan Pembelajaran (KKTP)', `Bab ${n}: ${esc(j)}`) + ident(idMapel()) +
+    (adaDraf() ? catatanDraf(DRAF) : '') +
+    `<table class="data"><thead><tr><th>Kode</th><th>Tujuan Pembelajaran</th><th>Perlu Bimbingan</th><th>Cukup</th><th>Baik</th><th>Sangat Baik</th></tr></thead><tbody>` +
+    tps.map(t => { const k = kt[t.tp_kode] || {}; return `<tr><td class="c">${esc(t.tp_kode)}</td><td>${esc(t.tp_teks)}</td><td>${esc(k.perlu_bimbingan)}</td><td>${esc(k.cukup)}</td><td>${esc(k.baik)}</td><td>${esc(k.sangat_baik)}</td></tr>`; }).join('') + `</tbody></table>` +
+    `<p style="font-size:9pt"><b>Teknik penilaian:</b> ${esc([...new Set(tps.map(t => (kt[t.tp_kode] || {}).teknik).filter(Boolean))].join('; '))}.<br>${esc(((kt[tps[0].tp_kode] || {}).ketuntasan) || '')}</p>` + ttd();
+  },
+  rpp() {
+    const [n, j] = babInfo(), a = atpBab(), tps = tpBab(), R = D.rpp;
+    const uniq = f => [...new Set(tps.map(t => (R[t.tp_kode] || {})[f]).filter(Boolean))];
+    return head('Modul Ajar / RPP', `Bab ${n}: ${esc(j)}`) + ident([...idMapel(), ['Alokasi Waktu', `${a.jp ?? ''} JP (${tps.length} pertemuan)`]]) +
+    (adaDraf() ? catatanDraf(DRAF) : '') +
+    `<div class="sec"><h4>A. Tujuan Pembelajaran</h4><ol>${tps.map(t => `<li>${esc(t.tp_teks)} <i>(${esc(t.tp_kode)})</i></li>`).join('')}</ol></div>
+    <div class="sec"><h4>B. Dimensi / Profil yang Dikembangkan</h4><p>${esc(a.profil)}</p></div>
+    <div class="sec"><h4>C. Pemahaman Bermakna dan Pertanyaan Pemantik</h4><p>${esc(a.pemahaman_bermakna || a.atp_teks)}<br>Pertanyaan pemantik: <i>${esc(a.pertanyaan_pemantik || `Apa yang kamu ketahui tentang “${j}”?`)}</i></p></div>
+    <div class="sec"><h4>D. Kegiatan Pembelajaran</h4>
+    ${tps.map((t, i) => { const r = R[t.tp_kode] || {}; return `<div class="box"><b>Pertemuan ${i+1} — ${esc(t.tp_kode)} (${t.jp ?? ''} JP)</b><br>
+      <u>Pendahuluan:</u> ${fmt(r.pendahuluan)}<br>
+      <u>Inti:</u><br>${fmt(r.inti)}<br>
+      <u>Penutup:</u> ${fmt(r.penutup)}</div>`; }).join('')}</div>
+    <div class="sec"><h4>E. Asesmen</h4><p>${esc(a.asesmen)}.</p></div>
+    <div class="sec"><h4>F. Media dan Sumber Belajar</h4><p>${uniq('media').map(esc).join('<br>')}</p></div>
+    <div class="sec"><h4>G. Refleksi Guru dan Peserta Didik</h4><p>${esc(uniq('refleksi_guru')[0] || 'Apa yang sudah dipahami? Bagian mana yang masih sulit? Apa rencana perbaikan pertemuan berikutnya?')}</p></div>` + ttd();
+  },
+  lkpd() {
+    const [n, j] = babInfo(), tps = tpBab(), L = D.lkpd;
+    const first = L[tps[0].tp_kode] || {};
+    const garis = r => `<div class="lines">${'<div></div>'.repeat((r && r.baris_jawaban) || 3)}</div>`;
+    return head('Lembar Kerja Peserta Didik (LKPD)', `Bab ${n}: ${esc(j)}`) +
+    `<table class="ident"><tr><td>Nama</td><td>:</td><td>............................................</td><td>Kelas</td><td>:</td><td>${D.meta.kelas}</td></tr><tr><td>Tanggal</td><td>:</td><td>............................................</td><td>Mapel</td><td>:</td><td>${esc(D.meta.nama_pendek || D.meta.nama)}</td></tr></table>` +
+    (adaDraf() ? catatanDraf(DRAF) : '') +
+    `<div class="box"><b>Petunjuk:</b> ${esc(first.petunjuk || 'Baca setiap kegiatan dengan teliti, kerjakan secara mandiri atau berkelompok, lalu tuliskan jawabanmu di tempat yang tersedia.')}</div>` +
+    tps.map((t, i) => { const l = L[t.tp_kode] || {}; return `<h4>Kegiatan ${i+1} — ${esc(t.tp_kode)}</h4><p><i>Tujuan: ${esc(t.tp_teks)}</i></p>
+      <p>${esc(l.kegiatan_1)}</p>${garis(l)}${l.kegiatan_2 ? `<p>${esc(l.kegiatan_2)}</p>${garis(l)}` : ''}`; }).join('') +
+    `<h4>Refleksi</h4><p>${esc(first.refleksi || 'Hal baru yang aku pelajari hari ini:')}</p><div class="lines"><div></div><div></div></div>
+     <div class="ttd"><div>Paraf Orang Tua / Pendamping<div class="sp"></div>(........................)</div><div>Nilai / Catatan Guru<div class="sp"></div>(........................)</div></div>`;
+  },
+};
+function render() { if (!D) return; renderTabs(); $('sheet').innerHTML = VIEW[aktif](); }
+
+// ── Aksi ─────────────────────────────────────────
+function toast(m) { const t = $('toast'); t.textContent = m; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2200); }
+function tandaiSelesai() {
+  selesai.add(aktif); renderTabs();
+  if (selesai.size === 6) { for (let i = 0; i < 26; i++) { const c = document.createElement('div'); c.className = 'confetti'; c.textContent = ['🎉','⭐','📘','✨','🎈'][i % 5]; c.style.left = Math.random() * 100 + 'vw'; c.style.animationDelay = Math.random() * .8 + 's'; document.body.appendChild(c); setTimeout(() => c.remove(), 3500); } toast('Keenam dokumen siap — hebat! 🎉'); }
+  else toast('Dokumen ditandai siap ✅');
+}
+function namaBerkas(ext) { const mp = (D.meta.nama_pendek || D.meta.mapel_slug).replace(/[^\w]+/g, '_'); return `${aktif.toUpperCase()}_${mp}_Kelas${D.meta.kelas}${['cp','tp','atp'].includes(aktif)?'':'_Bab'+babNo}.${ext}`; }
+function unduh(jenis) {
+  if (!D) return;
+  if (edit) toggleEdit();
+  if (jenis === 'pdf') { toast('Di jendela cetak, pilih “Simpan sebagai PDF”'); setTimeout(() => { window.print(); tandaiSelesai(); }, 400); return; }
+  if (jenis === 'doc') {
+    const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"><style>body{font-family:Calibri,Arial,sans-serif;font-size:11pt}table.data{border-collapse:collapse;width:100%}table.data th,table.data td{border:1px solid #000;padding:4px;vertical-align:top}.kop{text-align:center;border-bottom:3px double #000}.doc-title{text-align:center;font-weight:bold}.doc-sub{text-align:center}.note-gen{display:none}.lines div{border-bottom:1px dotted #555;height:22px}</style></head><body>${$('sheet').innerHTML}</body></html>`;
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['﻿', html], {type:'application/msword'})); a.download = namaBerkas('doc'); a.click(); tandaiSelesai(); return;
+  }
+  if (jenis === 'xls') {
+    if (typeof XLSX === 'undefined') { toast('Pustaka Excel gagal dimuat (cek internet)'); return; }
+    const tbl = $('sheet').querySelector('table.data'); if (!tbl) return;
+    XLSX.writeFile(XLSX.utils.table_to_book(tbl, {sheet: aktif.toUpperCase()}), namaBerkas('xlsx')); tandaiSelesai();
+  }
+}
+function toggleEdit() {
+  if (!D) return;
+  edit = !edit; $('sheet').contentEditable = edit; $('b-edit').classList.toggle('on', edit);
+  $('b-edit').textContent = edit ? '✔ Selesai Edit' : '✏️ Edit';
+  if (edit) toast('Klik teks di lembar untuk menyunting, lalu unduh');
+}
+
+// ── Data kop (disimpan ke biodata guru) ──────────
+function bukaKop() {
+  if (!D) return;
+  $('k-satuan').value = G.satuan || ''; $('k-alamat').value = G.alamat || ''; $('k-kota').value = G.kota || '';
+  $('k-kepala').value = G.kepala || ''; $('k-kepala-nip').value = G.kepalaNip || '';
+  $('modal-kop').classList.add('show');
+}
+function tutupKop() { $('modal-kop').classList.remove('show'); }
+async function simpanKop() {
+  const v = id => $(id).value.trim() || null;
+  const baru = { satuan_nama: v('k-satuan'), satuan_alamat: v('k-alamat'), kota: v('k-kota'), kepala_nama: v('k-kepala'), kepala_nip: v('k-kepala-nip') };
+  try {
+    if (!_sb) throw new Error('Tidak terhubung');
+    const { error } = await _sb.from('teachers').update(baru).eq('id', G.id);
+    if (error) throw error;
+  } catch (e) { console.error(e); toast('Gagal menyimpan. Coba lagi.'); return; }
+  Object.assign(G, { satuan: baru.satuan_nama || '', alamat: baru.satuan_alamat || '', kota: baru.kota || '', kepala: baru.kepala_nama || '', kepalaNip: baru.kepala_nip || '' });
+  tutupKop(); render(); toast('Data kop tersimpan ✅');
+}
+
+muat();
+</script>
+</body>
+</html>

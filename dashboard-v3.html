@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cipta Guru — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Bricolage+Grotesque:wght@700;800&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%234F46E5'/><text y='22' x='8' font-size='18' font-family='serif' font-weight='bold' fill='white'>C</text></svg>">
+<style>
+/* ── RESET ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-font-smoothing: antialiased; overflow: hidden; }
+body { display: flex; flex-direction: column; height: 100vh; background: #F8F7FF; }
+
+/* ════════════════════════════════
+   TOPBAR (menggantikan sidebar)
+════════════════════════════════ */
+.topbar {
+    flex-shrink: 0; height: 66px; background: white;
+    border-bottom: 1px solid #E5E3F0; box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 28px; gap: 16px; position: relative; z-index: 10;
+}
+.tb-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.brand { display: flex; align-items: center; gap: 11px; }
+.brand-logo {
+    width: 38px; height: 38px; border-radius: 11px; flex-shrink: 0; position: relative; overflow: hidden;
+    background: linear-gradient(135deg, #4F46E5, #7C3AED);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 1.1rem; color: white;
+}
+.brand-logo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; background: white; }
+.brand-name { font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 1rem; color: #0F172A; letter-spacing: -0.3px; line-height: 1.1; }
+.brand-ver { font-size: 0.6rem; color: #94a3b8; margin-top: 2px; }
+.crumb { display: flex; align-items: center; gap: 8px; font-size: 0.78rem; padding-left: 12px; border-left: 1px solid #E5E3F0; }
+.crumb[hidden] { display: none; }
+.crumb .bc-root { color: #94a3b8; font-weight: 500; cursor: pointer; }
+.crumb .bc-root:hover { color: #4F46E5; }
+.crumb .bc-sep { color: #cbd5e1; }
+.crumb .bc-curr { color: #4F46E5; font-weight: 700; white-space: nowrap; }
+
+.tb-right { display: flex; align-items: center; gap: 12px; }
+.user { display: flex; align-items: center; gap: 10px; }
+.user-avatar {
+    width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0; position: relative; overflow: hidden;
+    background: linear-gradient(135deg, #4F46E5, #7C3AED); color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.72rem; font-weight: 800; border: 2px solid rgba(79,70,229,0.3);
+}
+.user-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; position: absolute; inset: 0; }
+.user-info { display: flex; flex-direction: column; align-items: flex-start; min-width: 0; }
+.user-name-row { display: flex; align-items: center; gap: 7px; }
+.user-name { font-size: 0.8rem; font-weight: 700; color: #0F172A; white-space: nowrap; }
+.aktif-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.25);
+    border-radius: 20px; padding: 2px 8px; font-size: 0.58rem; font-weight: 700; color: #10B981; white-space: nowrap;
+}
+.aktif-dot { width: 5px; height: 5px; border-radius: 50%; background: #10B981; animation: blink 2s ease-in-out infinite; }
+@keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+.user-role { font-size: 0.68rem; color: #94a3b8; font-weight: 500; white-space: nowrap; }
+
+.tb-divider { width: 1px; height: 26px; background: #E5E3F0; }
+.tb-btn {
+    display: inline-flex; align-items: center; gap: 7px; padding: 8px 14px;
+    border-radius: 10px; border: 1.5px solid #E5E3F0; background: white; cursor: pointer;
+    font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.76rem; font-weight: 700; color: #374151;
+    transition: all 0.2s; white-space: nowrap;
+}
+.tb-btn:hover { border-color: #818CF8; color: #4F46E5; background: #EEF2FF; }
+.tb-btn.danger { border-color: rgba(244,63,94,0.25); color: #E11D48; background: rgba(244,63,94,0.05); }
+.tb-btn.danger:hover { border-color: rgba(244,63,94,0.45); background: rgba(244,63,94,0.12); color: #BE123C; }
+
+/* ════════════════════════════════
+   CONTENT
+════════════════════════════════ */
+.content { flex: 1; overflow-y: auto; padding: 26px 28px 40px; }
+.wrap { max-width: 1060px; margin: 0 auto; }
+#view-module { display: none; }
+
+/* Info card */
+.info-card { background: white; border: 1px solid #E5E3F0; border-radius: 16px; padding: 20px 24px; margin-bottom: 22px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+.info-card-top { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; }
+.info-card-icon { width: 40px; height: 40px; border-radius: 11px; background: linear-gradient(135deg, #EEF2FF, #C7D2FE); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+.info-card-title { font-family: 'Bricolage Grotesque', sans-serif; font-size: 1rem; font-weight: 800; color: #0F172A; }
+.info-card-sub { font-size: 0.72rem; color: #94a3b8; margin-top: 2px; }
+.year-badge { background: #EEF2FF; border: 1px solid #C7D2FE; border-radius: 20px; padding: 4px 14px; font-size: 0.72rem; font-weight: 700; color: #4F46E5; }
+.divider { height: 1px; background: #F1F5F9; margin-bottom: 14px; }
+.meta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px,1fr)); gap: 10px; margin-bottom: 14px; }
+.meta-cell { background: #F8F7FF; border-radius: 10px; padding: 10px 12px; border: 1px solid #E5E3F0; }
+.meta-label { font-size: 0.6rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; }
+.meta-value { font-size: 0.8rem; font-weight: 700; color: #0F172A; }
+.progress-label { font-size: 0.72rem; font-weight: 600; color: #64748B; }
+.progress-value { font-size: 0.72rem; font-weight: 700; color: #4F46E5; }
+.progress-track { height: 6px; background: #E5E3F0; border-radius: 99px; overflow: hidden; margin-top: 6px; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, #4F46E5, #7C3AED); border-radius: 99px; }
+
+.section-label { font-size: 0.62rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin: 0 2px 10px; }
+
+/* ── Tombol gabungan: CP · TP · ATP · RPP · LKPD · KKTP ── */
+.hero-btn {
+    position: relative; overflow: hidden; cursor: pointer; margin-bottom: 26px;
+    display: flex; align-items: center; gap: 20px; padding: 24px 28px; border-radius: 20px;
+    background: linear-gradient(135deg, #0F172A, #1E293B);
+    box-shadow: 0 10px 30px rgba(15,23,42,0.18);
+    transition: all 0.22s cubic-bezier(0.4,0,0.2,1);
+}
+.hero-btn::before { content: ''; position: absolute; top: -70px; right: -50px; width: 260px; height: 260px; background: radial-gradient(circle, rgba(99,102,241,0.38), transparent 70%); pointer-events: none; }
+.hero-btn:hover { transform: translateY(-3px); box-shadow: 0 16px 38px rgba(79,70,229,0.28); }
+.hero-icon { position: relative; width: 58px; height: 58px; border-radius: 16px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 1.7rem; background: linear-gradient(135deg, rgba(79,70,229,0.35), rgba(16,185,129,0.3)); border: 1.5px solid rgba(165,180,252,0.35); }
+.hero-body { position: relative; flex: 1; min-width: 0; }
+.hero-kicker { font-size: 0.62rem; font-weight: 700; color: rgba(110,231,183,0.9); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+.hero-title { font-family: 'Bricolage Grotesque', sans-serif; font-size: 1.3rem; font-weight: 800; color: white; letter-spacing: -0.3px; line-height: 1.2; }
+.hero-sub { font-size: 0.76rem; color: rgba(255,255,255,0.5); line-height: 1.55; margin-top: 5px; max-width: 560px; }
+.hero-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.hero-chips span { font-size: 0.66rem; font-weight: 700; color: #C7D2FE; background: rgba(99,102,241,0.2); border: 1px solid rgba(129,140,248,0.3); border-radius: 7px; padding: 3px 10px; }
+.hero-go { position: relative; flex-shrink: 0; padding: 12px 20px; border-radius: 12px; background: linear-gradient(135deg, #4F46E5, #7C3AED); color: white; font-family: 'Bricolage Grotesque', sans-serif; font-size: 0.88rem; font-weight: 800; box-shadow: 0 6px 18px rgba(79,70,229,0.45); transition: transform 0.2s; white-space: nowrap; }
+.hero-btn:hover .hero-go { transform: translateX(4px); }
+
+/* ── Tombol modul lainnya ── */
+.module-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+.module-btn {
+    background: white; border: 1.5px solid #E5E3F0; border-radius: 16px; padding: 18px 20px;
+    display: flex; align-items: center; gap: 14px; cursor: pointer;
+    transition: all 0.22s cubic-bezier(0.4,0,0.2,1); box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+.module-btn:hover { border-color: #818CF8; transform: translateY(-3px); box-shadow: 0 8px 24px rgba(79,70,229,0.12); }
+.module-btn:hover .module-arrow { transform: translateX(4px); color: #4F46E5; }
+.module-icon { width: 46px; height: 46px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.35rem; flex-shrink: 0; }
+.module-body { flex: 1; min-width: 0; }
+.module-title { font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 0.88rem; color: #0F172A; letter-spacing: -0.2px; margin-bottom: 3px; }
+.module-sub { font-size: 0.71rem; color: #94a3b8; line-height: 1.4; }
+.module-arrow { font-size: 0.95rem; color: #CBD5E1; transition: all 0.2s; flex-shrink: 0; }
+
+/* Terkunci sampai biodata lengkap (tetap bisa diklik supaya pop-up muncul) */
+.locked { opacity: 0.5; filter: grayscale(35%); cursor: not-allowed; }
+.locked:hover { transform: none !important; box-shadow: none !important; }
+.module-btn.locked:hover { border-color: #E5E3F0 !important; }
+
+/* ── View modul lain ("Segera Hadir") ── */
+.view-header { display: flex; align-items: center; gap: 12px; margin-bottom: 22px; flex-wrap: wrap; }
+.btn-back { padding: 7px 15px; border-radius: 9px; border: 1.5px solid #E5E3F0; background: white; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.78rem; font-weight: 600; color: #374151; cursor: pointer; transition: all 0.2s; flex-shrink: 0; }
+.btn-back:hover { border-color: #818CF8; color: #4F46E5; background: #EEF2FF; }
+.view-title { font-family: 'Bricolage Grotesque', sans-serif; font-size: 1rem; font-weight: 800; color: #0F172A; }
+.view-sub { font-size: 0.7rem; color: #94a3b8; margin-top: 2px; }
+.coming-soon { background: white; border: 1.5px dashed #E5E3F0; border-radius: 18px; padding: 56px 40px; text-align: center; }
+.cs-icon { font-size: 2.8rem; margin-bottom: 14px; }
+.cs-title { font-family: 'Bricolage Grotesque', sans-serif; font-size: 1.05rem; font-weight: 800; color: #0F172A; margin-bottom: 8px; }
+.cs-sub { font-size: 0.8rem; color: #94a3b8; line-height: 1.7; max-width: 320px; margin: 0 auto; }
+.cs-badge { display: inline-block; background: #EEF2FF; border: 1px solid #C7D2FE; color: #4F46E5; font-size: 0.7rem; font-weight: 700; padding: 4px 14px; border-radius: 20px; margin-top: 16px; }
+
+/* Pop-up biodata */
+#popup-biodata { display: none; position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,0.55); backdrop-filter: blur(4px); align-items: center; justify-content: center; }
+.popup-card { background: white; border-radius: 20px; padding: 36px 40px; max-width: 400px; width: 90%; text-align: center; box-shadow: 0 24px 64px rgba(0,0,0,0.2); animation: popIn 0.3s cubic-bezier(0.34,1.56,0.64,1); }
+@keyframes popIn { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+
+/* ── HP ── */
+@media (max-width: 760px) {
+    .topbar { padding: 0 14px; height: 60px; gap: 8px; }
+    .brand-ver, .user-info, .tb-divider, .tb-btn .txt { display: none; }
+    .tb-btn { padding: 9px 11px; }
+    .brand-name { white-space: nowrap; }
+    .crumb { display: none; }
+    .content { padding: 18px 14px 32px; }
+    .hero-btn { flex-wrap: wrap; padding: 20px; gap: 14px; }
+    .hero-go { width: 100%; text-align: center; }
+    .hero-title { font-size: 1.08rem; }
+}
+</style>
+</head>
+<body style="opacity:0;transition:opacity 0.3s ease;">
+
+<!-- ════════ TOPBAR ════════ -->
+<header class="topbar">
+    <div class="tb-left">
+        <div class="brand">
+            <div class="brand-logo">C
+                <img src="logo-ciptaguru6.png" alt="Cipta Guru"
+                     onerror="if(!this.dataset.f){this.dataset.f=1;this.src='logo-ciptaguru4.png';}else{this.style.display='none';}">
+            </div>
+            <div>
+                <div class="brand-name">Cipta Guru</div>
+                <div class="brand-ver">Hybrid+ v5</div>
+            </div>
+        </div>
+        <div class="crumb" id="crumb" hidden>
+            <span class="bc-root" onclick="showMain()">Dashboard</span>
+            <span class="bc-sep">/</span>
+            <span class="bc-curr" id="breadcrumb">—</span>
+        </div>
+    </div>
+
+    <div class="tb-right">
+        <div class="user">
+            <div class="user-avatar" id="user-avatar">?</div>
+            <div class="user-info">
+                <div class="user-name-row">
+                    <span class="user-name" id="user-name">Memuat…</span>
+                    <span class="aktif-badge" id="aktif-badge" style="display:none;"><span class="aktif-dot"></span>Aktif</span>
+                </div>
+                <span class="user-role" id="user-role"></span>
+            </div>
+        </div>
+        <div class="tb-divider"></div>
+        <button class="tb-btn" onclick="goToEditProfil()" title="Edit Data Pribadi"><span class="ico">👤</span><span class="txt">Edit Data Pribadi</span></button>
+        <button class="tb-btn danger" onclick="doLogout()" title="Keluar"><span class="ico">🚪</span><span class="txt">Keluar</span></button>
+    </div>
+</header>
+
+<!-- ════════ CONTENT ════════ -->
+<main class="content">
+<div class="wrap">
+
+    <!-- ══ DASHBOARD UTAMA ══ -->
+    <div id="view-main">
+
+        <div class="info-card">
+            <div class="info-card-top">
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <div class="info-card-icon">📚</div>
+                    <div>
+                        <div class="info-card-title">Manajemen Pembelajaran</div>
+                        <div class="info-card-sub">Pilih modul yang ingin dikerjakan hari ini.</div>
+                    </div>
+                </div>
+                <div class="year-badge" id="year-badge">Tahun Ajaran —</div>
+            </div>
+            <div class="divider"></div>
+            <div class="meta-grid">
+                <div class="meta-cell"><div class="meta-label">Guru Pengampu</div><div class="meta-value" id="meta-nama">—</div></div>
+                <div class="meta-cell"><div class="meta-label">Jabatan</div><div class="meta-value" id="meta-jabatan">—</div></div>
+                <div class="meta-cell"><div class="meta-label">Mata Pelajaran</div><div class="meta-value" id="meta-mapel">—</div></div>
+                <div class="meta-cell"><div class="meta-label">Status</div><div class="meta-value" id="meta-status">—</div></div>
+                <div class="meta-cell"><div class="meta-label">Role</div><div class="meta-value" id="meta-role">—</div></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                <span class="progress-label">Modul Selesai</span>
+                <span class="progress-value">0 / 6</span>
+            </div>
+            <div class="progress-track"><div class="progress-fill" style="width:0%;"></div></div>
+        </div>
+
+        <!-- 1 tombol gabungan: menggantikan CP & TP, KKTP, dan Modul Ajar & RPP -->
+        <div class="section-label">Mulai Mengajar</div>
+        <div class="hero-btn gated" onclick="bukaSelector()">
+            <div class="hero-icon">📘</div>
+            <div class="hero-body">
+                <div class="hero-kicker">Mulai dari sini</div>
+                <div class="hero-title">CP · TP · ATP · RPP · LKPD · KKTP</div>
+                <div class="hero-sub">Pilih materi sekali (paket, kelas, mapel, dan bab), lalu buka semua dokumen pembelajarannya tanpa mengisi ulang.</div>
+                <div class="hero-chips">
+                    <span>CP</span><span>TP</span><span>ATP</span><span>Modul Ajar / RPP</span><span>LKPD</span><span>KKTP</span>
+                </div>
+            </div>
+            <div class="hero-go">Pilih Materi →</div>
+        </div>
+
+        <!-- Tombol yang tetap ada -->
+        <div class="section-label">Perangkat Lainnya</div>
+        <div class="module-grid">
+
+            <div class="module-btn gated" onclick="showModule('prosem')">
+                <div class="module-icon" style="background:linear-gradient(135deg,#F0F9FF,#BAE6FD);">📅</div>
+                <div class="module-body"><div class="module-title">Prosem</div><div class="module-sub">Program Semester</div></div>
+                <div class="module-arrow">→</div>
+            </div>
+
+            <div class="module-btn gated" onclick="showModule('prota')">
+                <div class="module-icon" style="background:linear-gradient(135deg,#FDF4FF,#E9D5FF);">🗂️</div>
+                <div class="module-body"><div class="module-title">Prota</div><div class="module-sub">Program Tahunan</div></div>
+                <div class="module-arrow">→</div>
+            </div>
+
+            <div class="module-btn gated" onclick="showModule('bahan')">
+                <div class="module-icon" style="background:linear-gradient(135deg,#FFF1F2,#FECDD3);">📚</div>
+                <div class="module-body"><div class="module-title">Bahan Ajar</div><div class="module-sub">Materi pembelajaran terstruktur</div></div>
+                <div class="module-arrow">→</div>
+            </div>
+
+            <div class="module-btn gated" onclick="showModule('akm')">
+                <div class="module-icon" style="background:linear-gradient(135deg,#FFFBEB,#FDE68A);">📝</div>
+                <div class="module-body"><div class="module-title">Soal AKM</div><div class="module-sub">Asesmen Kompetensi Minimum</div></div>
+                <div class="module-arrow">→</div>
+            </div>
+
+            <div class="module-btn gated" onclick="showModule('asesmen')">
+                <div class="module-icon" style="background:linear-gradient(135deg,#ECFDF5,#6EE7B7);">📊</div>
+                <div class="module-body"><div class="module-title">Soal Asesmen Berbasis AKM</div><div class="module-sub">Instrumen penilaian berbasis AKM</div></div>
+                <div class="module-arrow">→</div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ══ TAMPILAN SATU UNTUK SEMUA MODUL YANG BELUM JADI ══ -->
+    <div id="view-module">
+        <div class="view-header">
+            <button class="btn-back" onclick="showMain()">← Kembali</button>
+            <div>
+                <div class="view-title" id="vm-title">—</div>
+                <div class="view-sub" id="vm-sub">—</div>
+            </div>
+        </div>
+        <div class="coming-soon">
+            <div class="cs-icon" id="vm-icon">📘</div>
+            <div class="cs-title" id="vm-title2">—</div>
+            <div class="cs-sub">Konten modul ini akan segera tersedia.<br>Silakan kembali ke dashboard untuk melanjutkan.</div>
+            <div class="cs-badge">Segera Hadir</div>
+        </div>
+    </div>
+
+</div>
+</main>
+
+<!-- Pop-up: biodata belum lengkap -->
+<div id="popup-biodata">
+    <div class="popup-card">
+        <div style="font-size:2.5rem;margin-bottom:14px;">📋</div>
+        <div style="font-family:'Bricolage Grotesque',sans-serif;font-size:1.1rem;font-weight:800;color:#0F172A;margin-bottom:10px;">Isi Data Pribadi Dulu</div>
+        <div style="font-size:0.82rem;color:#64748B;line-height:1.7;margin-bottom:22px;">
+            Lengkapi data pribadi kamu terlebih dahulu sebelum menggunakan modul pembelajaran.
+        </div>
+        <div style="display:flex;gap:10px;justify-content:center;">
+            <button onclick="document.getElementById('popup-biodata').style.display='none'"
+                style="padding:10px 20px;border-radius:10px;border:1.5px solid #E5E3F0;background:none;color:#374151;font-family:'Plus Jakarta Sans',sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;">Nanti</button>
+            <button onclick="window.location.href=HALAMAN.biodata"
+                style="padding:10px 24px;border-radius:10px;border:none;background:linear-gradient(135deg,#4F46E5,#7C3AED);color:white;font-family:'Plus Jakarta Sans',sans-serif;font-size:0.82rem;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(79,70,229,0.4);">Isi Sekarang →</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const _sb = (typeof supabase !== 'undefined')
+    ? supabase.createClient('https://geabugomvgsgemlmxggx.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlYWJ1Z29tdmdzZ2VtbG14Z2d4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYwNzU1NTgsImV4cCI6MjEwMTY1MTU1OH0.1dReCnfV-u45mqo1__AD7NNwjRQUWuPzV3WX1RRliZE')
+    : null;
+
+// ── AUTH ─────────────────────────────────────────────
+const HALAMAN = {            // ← satu-satunya tempat nama file halaman; ubah di sini kalau nama file berganti
+    index:     'index.html',
+    biodata:   'biodata-v6.html',
+    dashboard: 'dashboard-v3.html',
+    selector:  'cptp-selector-v4.html',
+    hub:       'hub.html',
+};
+
+if (localStorage.getItem('ciptaguru_logged_in') !== 'true' || !localStorage.getItem('ciptaguru_user_id')) {
+    window.location.href = HALAMAN.index;
+} else {
+    document.body.style.opacity = '1';
+}
+
+const $ = id => document.getElementById(id);
+const biodataLengkap = () => localStorage.getItem('ciptaguru_biodata_complete') === 'true';
+
+// ── DATA MODUL YANG MASIH "SEGERA HADIR" ─────────────
+const MODULES = {
+    prosem:  { icon: '📅', title: 'Prosem',                       sub: 'Program Semester' },
+    prota:   { icon: '🗂️', title: 'Prota',                        sub: 'Program Tahunan' },
+    bahan:   { icon: '📚', title: 'Bahan Ajar',                   sub: 'Materi pembelajaran terstruktur' },
+    akm:     { icon: '📝', title: 'Rancangan Soal AKM',           sub: 'Asesmen Kompetensi Minimum' },
+    asesmen: { icon: '📊', title: 'Soal Asesmen Berbasis AKM',    sub: 'Instrumen penilaian berbasis AKM' },
+};
+
+// ── PROFIL ───────────────────────────────────────────
+(function () {
+    const name    = localStorage.getItem('ciptaguru_teacher_name');
+    const role    = localStorage.getItem('ciptaguru_teacher_role');
+    const ini     = localStorage.getItem('ciptaguru_teacher_initials');
+    const mapel   = localStorage.getItem('ciptaguru_teacher_mapel');
+    const jabatan = localStorage.getItem('ciptaguru_teacher_jabatan');
+    const status  = localStorage.getItem('ciptaguru_teacher_status');
+    const set = (id, val) => { const e = $(id); if (e && val) e.textContent = val; };
+
+    if (name) {
+        set('user-name',    name);
+        set('user-role',    role || 'Guru');
+        set('user-avatar',  ini || name.substring(0, 2).toUpperCase());
+        set('meta-nama',    name);
+        set('meta-role',    role    || '—');
+        set('meta-jabatan', jabatan || '—');
+        set('meta-status',  status  || '—');
+        if (mapel) {
+            const daftar = mapel.split(',').map(s => s.trim()).filter(Boolean);
+            set('meta-mapel', daftar[0] + (daftar.length > 1 ? ` +${daftar.length - 1}` : ''));
+        }
+    } else {
+        const email = localStorage.getItem('ciptaguru_user_email') || '';
+        set('user-name', email || 'Guru');
+        set('user-avatar', (email || 'G').substring(0, 2).toUpperCase());
+    }
+
+    // Tahun ajaran dihitung otomatis (mulai Juli)
+    const d = new Date(), y = d.getFullYear();
+    $('year-badge').textContent = 'Tahun Ajaran ' + (d.getMonth() + 1 >= 7 ? `${y}/${y + 1}` : `${y - 1}/${y}`);
+
+    if (biodataLengkap()) {
+        $('aktif-badge').style.display = 'inline-flex';
+    } else {
+        document.querySelectorAll('.gated').forEach(el => el.classList.add('locked'));
+    }
+})();
+
+// ── NAVIGASI ─────────────────────────────────────────
+function butuhBiodata() {
+    if (biodataLengkap()) return false;
+    $('popup-biodata').style.display = 'flex';
+    return true;
+}
+
+// Tombol gabungan -> halaman pilih materi
+function bukaSelector() {
+    if (butuhBiodata()) return;
+    window.location.href = HALAMAN.selector;
+}
+
+function showModule(id) {
+    if (butuhBiodata()) return;
+    const m = MODULES[id];
+    if (!m) return;
+    $('vm-title').textContent  = m.icon + ' ' + m.title;
+    $('vm-title2').textContent = m.title;
+    $('vm-sub').textContent    = m.sub;
+    $('vm-icon').textContent   = m.icon;
+    $('breadcrumb').textContent = m.title;
+    $('crumb').hidden = false;
+    $('view-main').style.display = 'none';
+    $('view-module').style.display = 'block';
+    document.querySelector('.content').scrollTo(0, 0);
+}
+
+function showMain() {
+    $('view-module').style.display = 'none';
+    $('view-main').style.display = 'block';
+    $('crumb').hidden = true;
+    document.querySelector('.content').scrollTo(0, 0);
+}
+
+function goToEditProfil() { window.location.href = HALAMAN.biodata; }
+
+function doLogout() {
+    if (confirm('Yakin ingin keluar dari Cipta Guru?')) {
+        localStorage.clear();
+        window.location.href = HALAMAN.index;
+    }
+}
+
+// ── FOTO PROFIL ──────────────────────────────────────
+function setAvatarPhoto(src) {
+    const avatar = $('user-avatar');
+    if (!avatar) return;
+    avatar.childNodes.forEach(n => { if (n.nodeType === Node.TEXT_NODE) n.textContent = ''; });
+    let img = avatar.querySelector('img.avatar-photo');
+    if (!img) {
+        img = document.createElement('img');
+        img.className = 'avatar-photo';
+        avatar.insertBefore(img, avatar.firstChild);
+    }
+    img.src = src;
+}
+
+(async function () {
+    const saved = localStorage.getItem('ciptaguru_photo');
+    if (saved) { setAvatarPhoto(saved); return; }
+    const userId = localStorage.getItem('ciptaguru_user_id');
+    if (!userId || !_sb) return;
+    try {
+        const { data } = await _sb.from('teachers').select('foto_profil').eq('id', userId).single();
+        if (data?.foto_profil) {
+            localStorage.setItem('ciptaguru_photo', data.foto_profil);
+            setAvatarPhoto(data.foto_profil);
+        }
+    } catch (e) { console.warn('Foto profil:', e); }
+})();
+</script>
+
+</body>
+</html>

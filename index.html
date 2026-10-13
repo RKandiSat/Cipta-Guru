@@ -1,4 +1,5 @@
-<!DOCTYPE html>
+
+  <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
@@ -230,7 +231,7 @@
             display: inline-block;
             padding-bottom: 4px;
             background: linear-gradient(135deg, #38BDF8, #2DD4BF);
-            -webkit-background-clip: text;
+            -webkit-background-clip: text; 
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
@@ -666,7 +667,7 @@
         <!-- Brand -->
         <div class="brand">
             <div class="brand-icon">
-                <img src="logo-ciptaguru4.png" alt="Cipta Guru" style="width:100%;height:100%; object-fit:contain;border-radius:8px; transform:scale(1.2)">
+                <img src="logo-ciptaguru6.png" alt="" style="width:100%;height:100%; object-fit:contain;border-radius:8px; transform:scale(1.2)" onerror="if(!this.dataset.f){this.dataset.f=1;this.src='logo-ciptaguru4.png';}else{this.style.display='none';this.parentNode.append('C');}">
             </div>
             <div>
                 <div class="brand-name">Cipta Guru</div>
@@ -903,7 +904,7 @@
             </div>
 
             <!-- WhatsApp Button -->
-            <a href="https://wa.me/6281234567890?text=Halo%20Admin%20Cipta Guru%2C%20saya%20ingin%20mendapatkan%20passcode%20untuk%20mengakses%20Cipta Guru%20Beta."
+            <a href="https://wa.me/6281234567890?text=Halo%20Admin%20Cipta%20Guru%2C%20saya%20ingin%20mendapatkan%20passcode%20untuk%20mengakses%20Cipta%20Guru%20Beta."
                 target="_blank"
                 style="display:flex;align-items:center;justify-content:center;
                     gap:8px;width:100%;padding:11px 16px;
@@ -946,31 +947,23 @@ try {
     }
 } catch(e) { console.warn('Supabase:', e); }
 
-// Sudah login? Langsung ke dashboard
-if (localStorage.getItem('duniaguru_logged_in') === 'true') {
-    window.location.href = 'dashboard.html';
-} else {
-    document.body.style.opacity = '1';
+const HALAMAN = {            // ← satu-satunya tempat nama file halaman; ubah di sini kalau nama file berganti
+    index:     'index.html',
+    biodata:   'biodata-v6.html',
+    dashboard: 'dashboard-v3.html',
+    selector:  'cptp-selector-v4.html',
+    hub:       'hub.html',
+};
+
+// Sudah login? Langsung ke halaman berikutnya (biodata kalau belum lengkap, dashboard kalau sudah).
+// Tambahkan ?login pada alamat untuk tetap di halaman login.
+document.body.style.opacity = '1';
+if (localStorage.getItem('ciptaguru_logged_in') === 'true'
+    && localStorage.getItem('ciptaguru_user_id')
+    && !location.search.includes('login')) {
+    window.location.href = (localStorage.getItem('ciptaguru_biodata_complete') === 'true')
+        ? HALAMAN.dashboard : HALAMAN.biodata;
 }
-
-(async function() {
-    const saved = localStorage.getItem('duniaguru_photo');
-    if (saved) { setAvatarPhoto(saved); return; }
-
-    const userId = localStorage.getItem('duniaguru_user_id');
-    if (!userId || !_sb) return;
-    try {
-        const { data } = await _sb
-            .from('teachers')
-            .select('foto_profil')
-            .eq('id', userId)
-            .single();
-        if (data?.foto_profil) {
-            localStorage.setItem('duniaguru_photo', data.foto_profil);
-            setAvatarPhoto(data.foto_profil);
-        }
-    } catch(e) { console.warn('Foto profil:', e); }
-})();
 
 // ── LOGIN DENGAN PASSCODE ─────────────────────────────
 async function doLogin() {
@@ -1001,6 +994,11 @@ async function doLogin() {
         btn.disabled  = true;
     }
 
+    if (!_sb) {
+        if (btn) { btn.classList.remove('loading'); btn.innerHTML = 'Masuk ke Cipta Guru'; btn.disabled = false; }
+        if (errEl) { errEl.innerHTML = '⚠️ Koneksi ke server gagal. Periksa internet Anda.'; errEl.style.display = 'block'; }
+        return;
+    }
     try {
         // Cek passcode langsung di tabel teachers
         const { data, error } = await _sb
@@ -1013,11 +1011,11 @@ async function doLogin() {
         if (error || !data) {
             if (btn) {
                 btn.classList.remove('loading');
-                btn.innerHTML = 'Masuk ke duniaguru →';
+                btn.innerHTML = 'Masuk ke Cipta Guru';
                 btn.disabled  = false;
             }
             if (errEl) {
-                errEl.innerHTML = '⚠️ Passcode tidak valid. Hubungi admin duniaguru.';
+                errEl.innerHTML = '⚠️ Passcode tidak valid. Hubungi admin Cipta Guru.';
                 errEl.style.display = 'block';
             }
             if (input) {
@@ -1037,16 +1035,16 @@ async function doLogin() {
 
         // Simpan ke localStorage
         const nm = data.nama_lengkap || '';
-        localStorage.setItem('duniaguru_logged_in',        'true');
-        localStorage.setItem('duniaguru_user_id',          data.id);
-        localStorage.setItem('duniaguru_passcode',         passcode);
-        localStorage.setItem('duniaguru_teacher_name',     nm);
-        localStorage.setItem('duniaguru_teacher_initials', nm ? nm.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase() : '');
-        localStorage.setItem('duniaguru_teacher_role',     data.role || 'Guru');
-        localStorage.setItem('duniaguru_teacher_jabatan',  data.jabatan || '');
-        localStorage.setItem('duniaguru_teacher_status',   data.status_kepegawaian || '');
-        localStorage.setItem('duniaguru_teacher_mapel',    Array.isArray(data.mata_pelajaran) ? data.mata_pelajaran.join(', ') : '');
-        localStorage.setItem('duniaguru_biodata_complete', (data.biodata_complete === true) ? 'true' : 'false');
+        localStorage.setItem('ciptaguru_logged_in',        'true');
+        localStorage.setItem('ciptaguru_user_id',          data.id);
+        localStorage.setItem('ciptaguru_passcode',         passcode);
+        localStorage.setItem('ciptaguru_teacher_name',     nm);
+        localStorage.setItem('ciptaguru_teacher_initials', nm ? nm.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase() : '');
+        localStorage.setItem('ciptaguru_teacher_role',     data.role || 'Guru');
+        localStorage.setItem('ciptaguru_teacher_jabatan',  data.jabatan || '');
+        localStorage.setItem('ciptaguru_teacher_status',   data.status_kepegawaian || '');
+        localStorage.setItem('ciptaguru_teacher_mapel',    Array.isArray(data.mata_pelajaran) ? data.mata_pelajaran.join(', ') : '');
+        localStorage.setItem('ciptaguru_biodata_complete', (data.biodata_complete === true) ? 'true' : 'false');
 
         // Notifikasi sukses
         if (sucEl) {
@@ -1057,16 +1055,16 @@ async function doLogin() {
                 + '</span>';
             sucEl.style.display = 'block';
         }
-        if (sub) sub.innerHTML = 'Selamat datang di duniaguru! ✨';
+        if (sub) sub.innerHTML = 'Selamat datang di Cipta Guru! ✨';
 
         // Redirect berdasarkan status biodata
         setTimeout(() => {
-            window.location.href = (data.biodata_complete === true) ? 'dashboard.html' : 'biodata.html';
+            window.location.href = (data.biodata_complete === true) ? HALAMAN.dashboard : HALAMAN.biodata;
         }, 1500);
 
     } catch(err) {
         console.error('Login error:', err);
-        if (btn) { btn.classList.remove('loading'); btn.innerHTML = 'Masuk ke duniaguru →'; btn.disabled = false; }
+        if (btn) { btn.classList.remove('loading'); btn.innerHTML = 'Masuk ke Cipta Guru'; btn.disabled = false; }
         if (errEl) { errEl.innerHTML = '⚠️ Koneksi gagal. Periksa internet Anda.'; errEl.style.display = 'block'; }
     }
 }

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DuniaGuru — Hibrid+ V5 Beta</title>
+<title>Cipta Guru — Data Pribadi</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%234F46E5'/><text y='22' x='8' font-size='18' font-family='serif' font-weight='bold' fill='white'>C</text></svg>">
@@ -171,7 +171,7 @@ html,body{height:100%;overflow:hidden;font-family:'Plus Jakarta Sans',sans-serif
   <div class="sidebar">
     <div class="brand">
       <div class="brand-icon" style="padding:0;overflow:hidden;">
-        <img src="logo-ciptaguru4.png" alt="Cipta Guru"
+        <img src="logo-ciptaguru6.png" alt="Cipta Guru" onerror="if(!this.dataset.f){this.dataset.f=1;this.src='logo-ciptaguru4.png';}else{this.style.display='none';}"
           style="width:100%;height:100%;object-fit:cover;">
       </div>
       <div>
@@ -597,7 +597,7 @@ html,body{height:100%;overflow:hidden;font-family:'Plus Jakarta Sans',sans-serif
         <div class="form-grid col-2" style="margin-bottom:8px;">
           <div class="field">
             <label>Username / Email Login *</label>
-            <input type="email" id="username_email" placeholder="email untuk login ke DuniaGuru">
+            <input type="email" id="username_email" placeholder="email untuk login ke Cipta Guru">
           </div>
           <div class="field">
             <label>Role / Hak Akses *</label>
@@ -658,7 +658,7 @@ html,body{height:100%;overflow:hidden;font-family:'Plus Jakarta Sans',sans-serif
 
     <!-- Footer nav -->
     <div class="form-footer">
-      <button class="btn-prev" id="btn-prev" onclick="preHibrid+ V5tep()" disabled>← Sebelumnya</button>
+      <button class="btn-prev" id="btn-prev" onclick="prevStep()" disabled>← Sebelumnya</button>
       <div class="step-indicator" id="step-ind">Langkah 1 dari 7</div>
       <button class="btn-next" id="btn-next" onclick="nextStep()">Lanjut →</button>
     </div>
@@ -668,22 +668,34 @@ html,body{height:100%;overflow:hidden;font-family:'Plus Jakarta Sans',sans-serif
 </div><!-- /layout -->
 
 <script>
-const sb = supabase.createClient('https://geabugomvgsgemlmxggx.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlYWJ1Z29tdmdzZ2VtbG14Z2d4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYwNzU1NTgsImV4cCI6MjEwMTY1MTU1OH0.1dReCnfV-u45mqo1__AD7NNwjRQUWuPzV3WX1RRliZE');
+const sb = (typeof supabase !== 'undefined') ? supabase.createClient('https://geabugomvgsgemlmxggx.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlYWJ1Z29tdmdzZ2VtbG14Z2d4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYwNzU1NTgsImV4cCI6MjEwMTY1MTU1OH0.1dReCnfV-u45mqo1__AD7NNwjRQUWuPzV3WX1RRliZE') : null;
+
+const HALAMAN = {            // ← satu-satunya tempat nama file halaman; ubah di sini kalau nama file berganti
+    index:     'index.html',
+    biodata:   'biodata-v6.html',
+    dashboard: 'dashboard-v3.html',
+    selector:  'cptp-selector-v4.html',
+    hub:       'hub.html',
+};
+
 
 // ── AUTH: localStorage check ──────────────────────────
-if (localStorage.getItem('duniaguru_logged_in') !== 'true') {
-    window.location.href = 'index.html';
+// Mode pratinjau: di komputer sendiri (localhost / file / Live Server) halaman tetap tampil tanpa login.
+const _preview = ['localhost','127.0.0.1',''].includes(location.hostname) || location.search.includes('preview');
+if ((localStorage.getItem('ciptaguru_logged_in') !== 'true' || !localStorage.getItem('ciptaguru_user_id')) && !_preview) {
+    window.location.href = HALAMAN.index;
 } else {
     document.body.style.opacity = '1';
 }
 
-let _userId    = localStorage.getItem('duniaguru_user_id') || null;
-let _userEmail = localStorage.getItem('duniaguru_user_email') || null;
+let _userId    = localStorage.getItem('ciptaguru_user_id') || null;
+let _userEmail = localStorage.getItem('ciptaguru_user_email') || null;
 
 (async () => {
     // Passcode system — no Supabase session needed
 
     // Pre-fill form if editing existing biodata
+    if (!sb || !_userId) return;
     const { data: existing } = await sb
         .from('teachers')
         .select('*')
@@ -733,6 +745,7 @@ function prefillForm(d) {
         }
     }
     if (d.foto_profil) {
+    localStorage.setItem('ciptaguru_photo', d.foto_profil);
     const previewImg = document.getElementById('photo-preview-img');
     const initials   = document.getElementById('photo-initials');
     if (previewImg) {
@@ -755,7 +768,7 @@ const STEP_INFO = {
     3: { title:'Riwayat Pendidikan Formal', sub:'Data ijazah dan latar belakang akademik' },
     4: { title:'Data Penugasan Mengajar', sub:'Mata pelajaran, kelas, dan tugas tambahan' },
     5: { title:'Riwayat Mengajar', sub:'Pengalaman mengajar di sekolah atau instansi sebelumnya' },
-    6: { title:'Data Akses & Akun Aplikasi', sub:'Login credentials dan hak akses sistem DuniaGuru' },
+    6: { title:'Data Akses & Akun Aplikasi', sub:'Login credentials dan hak akses sistem Cipta Guru' },
     7: { title:'Upload Foto Profil', sub:'Tambahkan foto agar profil lebih mudah dikenali (opsional)' },
 };
 
@@ -784,7 +797,7 @@ function goToStep(n) {
     } else if (n === 7) {
         btnNext.textContent = '✓ Selesai — Ke Dashboard';
         btnNext.className   = 'btn-submit';
-        btnNext.onclick     = () => window.location.href = 'dashboard.html';
+        btnNext.onclick     = () => window.location.href = HALAMAN.dashboard;
     } else {
         btnNext.textContent = 'Lanjut →';
         btnNext.className   = 'btn-next';
@@ -796,7 +809,7 @@ function goToStep(n) {
 }
 
 function nextStep() { goToStep(currentStep + 1); }
-function preHibrid+ V5tep() { goToStep(currentStep - 1); }
+function prevStep() { goToStep(currentStep - 1); }
 
 // ══════════════════════════════════════════════════════
 // MULTI-SELECT
@@ -884,7 +897,7 @@ async function handleFotoUpload(event) {
         previewImg.style.display = 'block';
         if (initials) initials.style.display = 'none';
 
-        const userId   = localStorage.getItem('duniaguru_user_id');
+        const userId   = localStorage.getItem('ciptaguru_user_id');
         const fileName = `${userId}/profil.${file.name.split('.').pop()}`;
 
         try {
@@ -902,12 +915,12 @@ async function handleFotoUpload(event) {
                 .update({ foto_profil: publicUrl })
                 .eq('id', userId);
 
-            localStorage.setItem('duniaguru_photo', publicUrl);
+            localStorage.setItem('ciptaguru_photo', publicUrl);
             status.textContent = '✅ Foto berhasil diupload!';
             status.style.color = '#34D399';
         } catch(err) {
             console.error('Upload error:', err);
-            localStorage.setItem('duniaguru_photo', e.target.result);
+            localStorage.setItem('ciptaguru_photo', e.target.result);
             status.textContent = '✅ Foto tersimpan di perangkat ini.';
             status.style.color = '#34D399';
         }
@@ -940,8 +953,9 @@ async function submitData() {
     btn.textContent = '⏳ Menyimpan...';
     btn.disabled = true;
 
-    const userId = localStorage.getItem('duniaguru_user_id');
-    if (!userId) { alert('Sesi habis. Silakan login kembali.'); window.location.href='index.html'; return; }
+    const userId = localStorage.getItem('ciptaguru_user_id');
+    if (!sb) { alert('Koneksi ke server gagal. Periksa internet Anda lalu muat ulang halaman.'); btn.textContent = '✓ Masukkan Data'; btn.disabled = false; return; }
+    if (!userId) { alert('Sesi habis. Silakan login kembali.'); window.location.href=HALAMAN.index; return; }
 
     const get = id => document.getElementById(id)?.value?.trim() || null;
     if (!get('nama_lengkap') || !get('nik') || !get('email')) {
@@ -1000,13 +1014,13 @@ function showSuccess(nama) {
     const gelar = document.getElementById('gelar_belakang')?.value || '';
     const fullName = (nama + (gelar ? ', ' + gelar : '')).trim();
     const initials = nama.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
-    localStorage.setItem('duniaguru_teacher_name',     fullName);
-    localStorage.setItem('duniaguru_teacher_initials', initials);
-    localStorage.setItem('duniaguru_teacher_role',     document.getElementById('role')?.value || 'Guru');
-    localStorage.setItem('duniaguru_teacher_jabatan',  document.getElementById('jabatan')?.value || '');
-    localStorage.setItem('duniaguru_teacher_status',   document.getElementById('status_kepegawaian')?.value || '');
-    localStorage.setItem('duniaguru_teacher_mapel',    selectedMapel.join(', '));
-    localStorage.setItem('duniaguru_biodata_complete', 'true');
+    localStorage.setItem('ciptaguru_teacher_name',     fullName);
+    localStorage.setItem('ciptaguru_teacher_initials', initials);
+    localStorage.setItem('ciptaguru_teacher_role',     document.getElementById('role')?.value || 'Guru');
+    localStorage.setItem('ciptaguru_teacher_jabatan',  document.getElementById('jabatan')?.value || '');
+    localStorage.setItem('ciptaguru_teacher_status',   document.getElementById('status_kepegawaian')?.value || '');
+    localStorage.setItem('ciptaguru_teacher_mapel',    selectedMapel.join(', '));
+    localStorage.setItem('ciptaguru_biodata_complete', 'true');
 
     document.getElementById('status-badge').classList.add('show');
 
