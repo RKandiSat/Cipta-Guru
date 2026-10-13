@@ -266,7 +266,7 @@ body { display: flex; flex-direction: column; height: 100vh; background: #F8F7FF
                 <div class="module-arrow">→</div>
             </div>
 
-            <div class="module-btn gated" onclick="showModule('prota')">
+            <div class="module-btn gated" onclick="bukaProta()">
                 <div class="module-icon" style="background:linear-gradient(135deg,#FDF4FF,#E9D5FF);">🗂️</div>
                 <div class="module-body"><div class="module-title">Prota</div><div class="module-sub">Program Tahunan</div></div>
                 <div class="module-arrow">→</div>
@@ -343,6 +343,7 @@ const HALAMAN = {            // ← satu-satunya tempat nama file halaman; ubah 
     dashboard: 'dashboard-v3.html',
     selector:  'cptp-selector-v4.html',
     prosem:    'prosem.html',
+    prota:     'prota.html',
 };
 
 if (localStorage.getItem('ciptaguru_logged_in') !== 'true' || !localStorage.getItem('ciptaguru_user_id')) {
@@ -421,6 +422,13 @@ function bukaProsem() {
     let p = {};
     try { p = JSON.parse(localStorage.getItem('ciptaguru_bab_pilihan') || '{}'); } catch (e) {}
     window.location.href = (p && p.mapel_slug && p.kelas) ? HALAMAN.prosem : HALAMAN.selector + '?tujuan=prosem';
+}
+
+function bukaProta() {
+    if (butuhBiodata()) return;
+    let p = {};
+    try { p = JSON.parse(localStorage.getItem('ciptaguru_bab_pilihan') || '{}'); } catch (e) {}
+    window.location.href = (p && p.mapel_slug && p.kelas) ? HALAMAN.prota : HALAMAN.selector + '?tujuan=prota';
 }
 
 function showModule(id) {

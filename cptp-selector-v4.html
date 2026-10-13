@@ -314,6 +314,7 @@ const HALAMAN = {            // ← satu-satunya tempat nama file halaman; ubah 
     hub:       'hub.html',
     dokumen:   'dokumen.html',
     prosem:    'prosem.html',
+    prota:     'prota.html',
 };
 
 if (localStorage.getItem('ciptaguru_logged_in') !== 'true' || !localStorage.getItem('ciptaguru_user_id')) {
@@ -645,7 +646,7 @@ function lanjutkan() {
     };
     localStorage.setItem('ciptaguru_bab_pilihan', JSON.stringify(pilihan));
     const tujuan = new URLSearchParams(location.search).get('tujuan');
-    window.location.href = (tujuan === 'prosem') ? HALAMAN.prosem : HALAMAN.dokumen;
+    window.location.href = (tujuan === 'prosem') ? HALAMAN.prosem : (tujuan === 'prota') ? HALAMAN.prota : HALAMAN.dokumen;
 }
 
 refresh();
