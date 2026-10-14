@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cipta Guru — Bahan Ajar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Bricolage+Grotesque:wght@700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:#F8F7FF;color:#0F172A;-webkit-font-smoothing:antialiased;min-height:100vh;}
+.top{background:white;border-bottom:1px solid #E5E3F0;padding:12px 24px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;position:sticky;top:0;z-index:20;}
+.back{font-size:.75rem;font-weight:700;color:#4F46E5;cursor:pointer;white-space:nowrap;}
+.ctx{flex:1;min-width:220px;}
+.ctx b{font-family:'Bricolage Grotesque',sans-serif;font-size:1rem;display:block;line-height:1.2;}
+.ctx span{font-size:.7rem;color:#94a3b8;}
+.wrap{max-width:900px;margin:22px auto 60px;padding:0 20px;}
+.intro{font-size:.8rem;color:#64748B;line-height:1.6;margin-bottom:16px;}
+.filt{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px;}
+.filt input,.filt select{padding:9px 12px;border:1.5px solid #E5E3F0;border-radius:11px;font:600 .78rem 'Plus Jakarta Sans';background:white;color:#334155;}
+.filt input{flex:1;min-width:200px;}
+.sec{font:800 .8rem 'Bricolage Grotesque';color:#4F46E5;text-transform:uppercase;letter-spacing:.6px;margin:20px 0 10px;}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px;}
+.book{background:white;border:1px solid #E5E3F0;border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:6px;transition:all .18s;text-decoration:none;color:inherit;}
+.book:hover{border-color:#818CF8;box-shadow:0 8px 24px rgba(79,70,229,.14);transform:translateY(-2px);}
+.tag{align-self:flex-start;font-size:.62rem;font-weight:800;padding:3px 9px;border-radius:99px;background:#EEF2FF;color:#4338CA;}
+.tag.guru{background:#ECFDF5;color:#047857;}
+.tag.lain{background:#FFF7ED;color:#C2410C;}
+.book h4{font:700 .88rem 'Plus Jakarta Sans';line-height:1.35;}
+.book small{font-size:.68rem;color:#94a3b8;}
+.book .go{margin-top:auto;padding-top:8px;font-size:.74rem;font-weight:800;color:#4F46E5;}
+.state{text-align:center;padding:60px 20px;color:#64748B;font-size:.88rem;line-height:1.7;background:white;border:1px dashed #CBD5E1;border-radius:16px;}
+.state b{display:block;font-size:1.05rem;color:#0F172A;margin-bottom:6px;}
+.btn{display:inline-flex;margin-top:12px;padding:9px 15px;border-radius:11px;border:1.5px solid #E5E3F0;background:white;font:700 .76rem 'Plus Jakarta Sans';color:#374151;cursor:pointer;}
+</style>
+</head>
+<body>
+<div class="top">
+  <a class="back" onclick="location.href=HALAMAN.dashboard">🏠 Dashboard</a>
+  <div class="ctx"><b>Bahan Ajar</b><span id="ctx-sub">Buku elektronik resmi pemerintah</span></div>
+</div>
+<div class="wrap">
+  <p class="intro">Kumpulan tautan buku elektronik resmi dari pemerintah. Cari atau saring berdasarkan kelas dan mata pelajaran, lalu klik kartu untuk membuka bukunya di tab baru.</p>
+  <div class="filt"><input id="q" placeholder="🔍 Cari judul buku…"><select id="f-kelas"></select><select id="f-mapel"></select><select id="f-jenis"></select></div>
+  <div id="isi"><div class="state"><b>Memuat…</b>Mengambil daftar buku.</div></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const _sb = (typeof supabase !== 'undefined') ? supabase.createClient('https://geabugomvgsgemlmxggx.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlYWJ1Z29tdmdzZ2VtbG14Z2d4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYwNzU1NTgsImV4cCI6MjEwMTY1MTU1OH0.1dReCnfV-u45mqo1__AD7NNwjRQUWuPzV3WX1RRliZE') : null;
+const HALAMAN = { index:'index.html', dashboard:'dashboard-v3.html' };
+if (localStorage.getItem('ciptaguru_logged_in') !== 'true' || !localStorage.getItem('ciptaguru_user_id')) location.href = HALAMAN.index;
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const amanUrl = u => { // hanya tautan resmi pemerintah (https + domain .go.id)
+  try { const x = new URL(String(u||'').trim()); return (x.protocol==='https:' && /(^|\.)go\.id$/i.test(x.hostname)) ? x.href : ''; } catch(e){ return ''; } };
+
+function kartu(b){
+  const j = (b.jenis||'').toLowerCase();
+  const cls = j.includes('guru') ? 'guru' : (j.includes('siswa') ? '' : 'lain');
+  return `<a class="book" href="${esc(amanUrl(b.url))}" target="_blank" rel="noopener noreferrer">
+    <span class="tag ${cls}">${esc(b.jenis||'Buku')}</span>
+    <h4>${esc(b.judul)}</h4>
+    <small>${esc(b.penerbit||'')}</small>
+    <span class="go">Buka buku →</span></a>`;
+}
+
+let SEMUA=[];
+const opsi=(id,label,vals)=>{const el=$(id);const cur=el.value;el.innerHTML=`<option value="">${label}</option>`+vals.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join('');el.value=cur;};
+function tampil(){
+  const q=$('q').value.trim().toLowerCase(), k=$('f-kelas').value, m=$('f-mapel').value, j=$('f-jenis').value;
+  const hasil=SEMUA.filter(b=>(!q||(b.judul+' '+(b.mapel||'')).toLowerCase().includes(q))&&(!k||String(b.kelas??'')===k)&&(!m||b.mapel===m)&&(!j||b.jenis===j));
+  if(!hasil.length){$('isi').innerHTML='<div class="state"><b>Tidak ada buku</b>Coba ubah kata kunci atau filter.</div>';return;}
+  const grup={};hasil.forEach(b=>{const key=(b.mapel||'Lainnya')+(b.kelas?` — Kelas ${b.kelas}`:'');(grup[key]=grup[key]||[]).push(b);});
+  $('isi').innerHTML=Object.keys(grup).map(g=>`<div class="sec">${esc(g)}</div><div class="grid">${grup[g].map(kartu).join('')}</div>`).join('');
+}
+(async function(){
+  if(!_sb){$('isi').innerHTML='<div class="state"><b>Tidak terhubung</b>Muat ulang halaman.</div>';return;}
+  const {data,error}=await _sb.from('bahan_ajar').select('*').eq('aktif',true).order('kelas').order('mapel').order('urutan');
+  if(error){$('isi').innerHTML=`<div class="state"><b>Gagal memuat</b>${esc(error.message)}</div>`;return;}
+  SEMUA=(data||[]).filter(b=>amanUrl(b.url));
+  if(!SEMUA.length){$('isi').innerHTML='<div class="state"><b>Link buku belum tersedia</b>Segera ditambahkan.</div>';return;}
+  const uniq=a=>[...new Set(a.filter(x=>x!==null&&x!==''&&x!==undefined))];
+  opsi('f-kelas','Semua kelas',uniq(SEMUA.map(b=>b.kelas)).sort((a,b)=>a-b).map(String));
+  opsi('f-mapel','Semua mapel',uniq(SEMUA.map(b=>b.mapel)).sort());
+  opsi('f-jenis','Semua jenis',uniq(SEMUA.map(b=>b.jenis)).sort());
+  ['q','f-kelas','f-mapel','f-jenis'].forEach(i=>$(i).addEventListener(i==='q'?'input':'change',tampil));
+  tampil();
+})();
+</script>
+</body>
+</html>

@@ -272,7 +272,7 @@ body { display: flex; flex-direction: column; height: 100vh; background: #F8F7FF
                 <div class="module-arrow">→</div>
             </div>
 
-            <div class="module-btn gated" onclick="showModule('bahan')">
+            <div class="module-btn gated" onclick="bukaBahan()">
                 <div class="module-icon" style="background:linear-gradient(135deg,#FFF1F2,#FECDD3);">📚</div>
                 <div class="module-body"><div class="module-title">Bahan Ajar</div><div class="module-sub">Materi pembelajaran terstruktur</div></div>
                 <div class="module-arrow">→</div>
@@ -344,6 +344,7 @@ const HALAMAN = {            // ← satu-satunya tempat nama file halaman; ubah 
     selector:  'cptp-selector-v4.html',
     prosem:    'prosem.html',
     prota:     'prota.html',
+    bahan:     'bahan-ajar.html',
 };
 
 if (localStorage.getItem('ciptaguru_logged_in') !== 'true' || !localStorage.getItem('ciptaguru_user_id')) {
@@ -429,6 +430,11 @@ function bukaProta() {
     let p = {};
     try { p = JSON.parse(localStorage.getItem('ciptaguru_bab_pilihan') || '{}'); } catch (e) {}
     window.location.href = (p && p.mapel_slug && p.kelas) ? HALAMAN.prota : HALAMAN.selector + '?tujuan=prota';
+}
+
+function bukaBahan() {
+    if (butuhBiodata()) return;
+    window.location.href = HALAMAN.bahan;
 }
 
 function showModule(id) {
