@@ -11,7 +11,7 @@
 /* ── RESET ── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-font-smoothing: antialiased; overflow: hidden; }
-body { display: flex; flex-direction: column; height: 100vh; background: #F8F7FF; }
+body { display: flex; flex-direction: column; height: 100vh; height: 100dvh; background: #F8F7FF; }
 
 /* ════════════════════════════════
    TOPBAR (menggantikan sidebar)
@@ -157,6 +157,11 @@ body { display: flex; flex-direction: column; height: 100vh; background: #F8F7FF
 
 /* ── HP ── */
 @media (max-width: 760px) {
+    /* HP: halaman bergulir biasa (bukan kotak tinggi tetap) supaya tombol paling bawah tidak terpotong */
+    html, body { height: auto; overflow: visible; }
+    body { display: block; min-height: 100dvh; }
+    .topbar { position: sticky; top: 0; }
+    .content { overflow: visible; padding-bottom: calc(48px + env(safe-area-inset-bottom)); }
     .topbar { padding: 0 14px; height: 60px; gap: 8px; }
     .brand-ver, .user-info, .tb-divider, .tb-btn .txt { display: none; }
     .tb-btn { padding: 9px 11px; }
@@ -278,18 +283,11 @@ body { display: flex; flex-direction: column; height: 100vh; background: #F8F7FF
                 <div class="module-arrow">→</div>
             </div>
 
-            <div class="module-btn gated" onclick="showModule('akm')">
-                <div class="module-icon" style="background:linear-gradient(135deg,#FFFBEB,#FDE68A);">📝</div>
-                <div class="module-body"><div class="module-title">Soal AKM</div><div class="module-sub">Asesmen Kompetensi Minimum</div></div>
-                <div class="module-arrow">→</div>
-            </div>
-
             <div class="module-btn gated" onclick="showModule('asesmen')">
-                <div class="module-icon" style="background:linear-gradient(135deg,#ECFDF5,#6EE7B7);">📊</div>
-                <div class="module-body"><div class="module-title">Soal Asesmen Berbasis AKM</div><div class="module-sub">Instrumen penilaian berbasis AKM</div></div>
+                <div class="module-icon" style="background:linear-gradient(135deg,#FFFBEB,#FDE68A);">📝</div>
+                <div class="module-body"><div class="module-title">Asesmen</div><div class="module-sub">Formatif, sumatif, akhir jenjang &amp; akhir tahun</div></div>
                 <div class="module-arrow">→</div>
             </div>
-
         </div>
     </div>
 
@@ -361,8 +359,7 @@ const MODULES = {
     prosem:  { icon: '📅', title: 'Prosem',                       sub: 'Program Semester' },
     prota:   { icon: '🗂️', title: 'Prota',                        sub: 'Program Tahunan' },
     bahan:   { icon: '📚', title: 'Bahan Ajar',                   sub: 'Materi pembelajaran terstruktur' },
-    akm:     { icon: '📝', title: 'Rancangan Soal AKM',           sub: 'Asesmen Kompetensi Minimum' },
-    asesmen: { icon: '📊', title: 'Soal Asesmen Berbasis AKM',    sub: 'Instrumen penilaian berbasis AKM' },
+    asesmen: { icon: '📝', title: 'Asesmen', sub: 'Formatif, sumatif, akhir jenjang & akhir tahun' },
 };
 
 // ── PROFIL ───────────────────────────────────────────
