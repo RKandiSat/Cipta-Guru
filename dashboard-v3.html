@@ -283,7 +283,7 @@ body { display: flex; flex-direction: column; height: 100vh; height: 100dvh; bac
                 <div class="module-arrow">→</div>
             </div>
 
-            <div class="module-btn gated" onclick="showModule('asesmen')">
+            <div class="module-btn gated" onclick="bukaAsesmen()">
                 <div class="module-icon" style="background:linear-gradient(135deg,#FFFBEB,#FDE68A);">📝</div>
                 <div class="module-body"><div class="module-title">Asesmen</div><div class="module-sub">Formatif, sumatif, akhir jenjang &amp; akhir tahun</div></div>
                 <div class="module-arrow">→</div>
@@ -432,6 +432,11 @@ function bukaProta() {
 function bukaBahan() {
     if (butuhBiodata()) return;
     window.location.href = HALAMAN.bahan;
+}
+
+function bukaAsesmen() {
+    if (butuhBiodata()) return;
+    window.location.href = 'https://asesmen.ciptaguru.com/?jenis=formatif';
 }
 
 function showModule(id) {
