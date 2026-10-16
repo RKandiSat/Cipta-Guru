@@ -903,7 +903,7 @@
             </div>
 
             <!-- WhatsApp Button -->
-            <a href="https://wa.me/6285775578707?text=Halo%20Admin%20Cipta%20Guru%2C%20saya%20ingin%20mendapatkan%20passcode%20untuk%20mengakses%20Cipta%20Guru%20Beta."
+            <a href="https://wa.me/6281234567890?text=Halo%20Admin%20Cipta%20Guru%2C%20saya%20ingin%20mendapatkan%20passcode%20untuk%20mengakses%20Cipta%20Guru%20Beta."
                 target="_blank"
                 style="display:flex;align-items:center;justify-content:center;
                     gap:8px;width:100%;padding:11px 16px;
@@ -999,13 +999,10 @@ async function doLogin() {
         return;
     }
     try {
-        // Cek passcode langsung di tabel teachers
-        const { data, error } = await _sb
-            .from('teachers')
-            .select('id, nama_lengkap, role, jabatan, status_kepegawaian, mata_pelajaran, biodata_complete, status_akun')
-            .eq('passcode', passcode)
-            .eq('status_akun', 'Aktif')
-            .single();
+        // Cek passcode di server (yang tersimpan hanya hash, bukan passcode asli)
+        const { data: hasil, error } = await _sb.rpc('cg_login', { p_passcode: passcode });
+        const data = (hasil && hasil.ok) ? hasil.guru : null;
+        const pesanServer = (hasil && hasil.pesan && /banyak/i.test(hasil.pesan)) ? hasil.pesan : '';
 
         if (error || !data) {
             if (btn) {
@@ -1014,7 +1011,7 @@ async function doLogin() {
                 btn.disabled  = false;
             }
             if (errEl) {
-                errEl.innerHTML = '⚠️ Passcode tidak valid. Hubungi admin Cipta Guru.';
+                errEl.innerHTML = '⚠️ ' + (pesanServer || 'Passcode tidak valid. Hubungi admin Cipta Guru.');
                 errEl.style.display = 'block';
             }
             if (input) {
