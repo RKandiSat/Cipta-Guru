@@ -69,6 +69,26 @@ body { display: flex; flex-direction: column; height: 100vh; height: 100dvh; bac
     transition: all 0.2s; white-space: nowrap;
 }
 .tb-btn:hover { border-color: #818CF8; color: #4F46E5; background: #EEF2FF; }
+/* Penanda "isi biodata dulu": berdenyut seperti tombol WhatsApp di halaman login */
+.tb-btn.glow { background: linear-gradient(135deg, #4F46E5, #7C3AED); color: #fff; border-color: transparent; animation: glowBiodata 1.4s ease-in-out infinite; }
+.tb-btn.glow:hover { color: #fff; background: linear-gradient(135deg, #4338CA, #6D28D9); }
+@keyframes glowBiodata {
+    0%   { transform: scale(1);    box-shadow: 0 0 12px rgba(99,102,241,0.35); }
+    14%  { transform: scale(1.05); box-shadow: 0 0 24px rgba(99,102,241,0.75); }
+    28%  { transform: scale(1);    box-shadow: 0 0 12px rgba(99,102,241,0.35); }
+    42%  { transform: scale(1.04); box-shadow: 0 0 20px rgba(99,102,241,0.6); }
+    70%  { transform: scale(1);    box-shadow: 0 0 12px rgba(99,102,241,0.35); }
+    100% { transform: scale(1);    box-shadow: 0 0 12px rgba(99,102,241,0.35); }
+}
+/* Guru baru (biodata belum diisi): tampilan dashboard dibuat blur dan statis sampai biodata tersimpan */
+.blok-info { position: relative; }
+.kunci-info { display: none; position: absolute; inset: -4px; z-index: 5; flex-direction: column; align-items: center; justify-content: center; gap: 6px; text-align: center; padding: 12px; border-radius: 14px; background: rgba(255,255,255,0.45); }
+.kunci-info .ki-judul { font-family: 'Bricolage Grotesque', sans-serif; font-size: 1rem; font-weight: 800; color: #0F172A; }
+.kunci-info .ki-sub { font-size: 0.76rem; color: #475569; max-width: 380px; line-height: 1.5; }
+.kunci-info .ki-btn { margin-top: 6px; padding: 9px 20px; border: none; border-radius: 10px; background: linear-gradient(135deg, #4F46E5, #7C3AED); color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.8rem; font-weight: 700; cursor: pointer; box-shadow: 0 4px 14px rgba(79,70,229,0.35); }
+.blur-biodata .blok-info .meta-grid, .blur-biodata .blok-info .prog-head, .blur-biodata .blok-info .prog-wrap, .blur-biodata .blok-info .prog-steps { filter: blur(5px); user-select: none; pointer-events: none; }
+.blur-biodata .hero-btn, .blur-biodata .module-grid, .blur-biodata .section-label { filter: blur(2.5px) grayscale(30%); user-select: none; pointer-events: none; }
+@media (prefers-reduced-motion: reduce) { .tb-btn.glow { animation: none; box-shadow: 0 0 14px rgba(99,102,241,0.6); } }
 .tb-btn.danger { border-color: rgba(244,63,94,0.25); color: #E11D48; background: rgba(244,63,94,0.05); }
 .tb-btn.danger:hover { border-color: rgba(244,63,94,0.45); background: rgba(244,63,94,0.12); color: #BE123C; }
 
@@ -148,6 +168,7 @@ body { display: flex; flex-direction: column; height: 100vh; height: 100dvh; bac
 /* Terkunci sampai biodata lengkap (tetap bisa diklik supaya pop-up muncul) */
 .locked { opacity: 0.5; filter: grayscale(35%); cursor: not-allowed; }
 .locked:hover { transform: none !important; box-shadow: none !important; }
+/* Biodata belum diisi: tampilan statis/buram, modul tidak bisa diklik */
 .module-btn.locked:hover { border-color: #E5E3F0 !important; }
 
 /* ── View modul lain ("Segera Hadir") ── */
@@ -220,7 +241,7 @@ body { display: flex; flex-direction: column; height: 100vh; height: 100dvh; bac
             </div>
         </div>
         <div class="tb-divider"></div>
-        <button class="tb-btn" onclick="goToEditProfil()" title="Edit Data Pribadi"><span class="ico">👤</span><span class="txt">Edit Data Pribadi</span></button>
+        <button class="tb-btn" id="btn-edit-profil" onclick="goToEditProfil()" title="Edit Data Pribadi"><span class="ico">👤</span><span class="txt">Edit Data Pribadi</span></button>
         <button class="tb-btn danger" onclick="doLogout()" title="Keluar"><span class="ico">🚪</span><span class="txt">Keluar</span></button>
     </div>
 </header>
@@ -231,6 +252,7 @@ body { display: flex; flex-direction: column; height: 100vh; height: 100dvh; bac
 
     <!-- ══ DASHBOARD UTAMA ══ -->
     <div id="view-main">
+
 
         <div class="info-card">
             <div class="info-card-top">
@@ -244,6 +266,12 @@ body { display: flex; flex-direction: column; height: 100vh; height: 100dvh; bac
                 <div class="year-badge" id="year-badge">Tahun Ajaran —</div>
             </div>
             <div class="divider"></div>
+            <div class="blok-info">
+            <div class="kunci-info" id="kunci-info">
+                <div class="ki-judul">🔒 Lengkapi data pribadi dulu</div>
+                <div class="ki-sub">Isi biodata (7 langkah singkat) agar seluruh fitur Cipta Guru terbuka.</div>
+                <button class="ki-btn" onclick="goToEditProfil()">Isi Data Pribadi →</button>
+            </div>
             <div class="meta-grid">
                 <div class="meta-cell"><div class="meta-label">Guru Pengampu</div><div class="meta-value" id="meta-nama">—</div></div>
                 <div class="meta-cell"><div class="meta-label">Jabatan</div><div class="meta-value" id="meta-jabatan">—</div></div>
@@ -260,6 +288,7 @@ body { display: flex; flex-direction: column; height: 100vh; height: 100dvh; bac
                 <div class="prog-logo" id="prog-logo" aria-hidden="true">🎓</div>
             </div>
             <div class="prog-steps" id="prog-steps"></div>
+            </div>
         </div>
 
         <!-- 1 tombol gabungan: menggantikan CP & TP, KKTP, dan Modul Ajar & RPP -->
@@ -388,17 +417,21 @@ const MODULES = {
     const status  = localStorage.getItem('ciptaguru_teacher_status');
     const set = (id, val) => { const e = $(id); if (e && val) e.textContent = val; };
 
+    const lengkap = biodataLengkap();
     if (name) {
         set('user-name',    name);
-        set('user-role',    role || 'Guru');
+        set('user-role',    lengkap ? (role || 'Guru') : 'Biodata belum diisi');
         set('user-avatar',  ini || name.substring(0, 2).toUpperCase());
-        set('meta-nama',    name);
-        set('meta-role',    role    || '—');
-        set('meta-jabatan', jabatan || '—');
-        set('meta-status',  status  || '—');
-        if (mapel) {
-            const daftar = mapel.split(',').map(s => s.trim()).filter(Boolean);
-            set('meta-mapel', daftar[0] + (daftar.length > 1 ? ` +${daftar.length - 1}` : ''));
+        // Kotak data guru hanya terisi setelah biodata diisi dan disimpan; sebelum itu tetap kosong (—)
+        if (lengkap) {
+            set('meta-nama',    name);
+            set('meta-role',    role    || '—');
+            set('meta-jabatan', jabatan || '—');
+            set('meta-status',  status  || '—');
+            if (mapel) {
+                const daftar = mapel.split(',').map(s => s.trim()).filter(Boolean);
+                set('meta-mapel', daftar[0] + (daftar.length > 1 ? ` +${daftar.length - 1}` : ''));
+            }
         }
     } else {
         const email = localStorage.getItem('ciptaguru_user_email') || '';
@@ -414,6 +447,9 @@ const MODULES = {
         $('aktif-badge').style.display = 'inline-flex';
     } else {
         document.querySelectorAll('.gated').forEach(el => el.classList.add('locked'));
+        document.body.classList.add('blur-biodata');
+        const ki = $('kunci-info'); if (ki) ki.style.display = 'flex';
+        const be = $('btn-edit-profil'); if (be) be.classList.add('glow');   // tombol berpendar sampai biodata tersimpan
     }
 })();
 
