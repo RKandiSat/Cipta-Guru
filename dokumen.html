@@ -34,7 +34,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#F8F7FF;color:#0F172A
 .btn.on{background:#ECFDF5;border-color:#10B981;color:#047857;}
 .prog{margin-left:auto;font-size:.72rem;font-weight:700;color:#4F46E5;background:#EEF2FF;border:1px solid #C7D2FE;border-radius:20px;padding:6px 14px;}
 .stage{padding:18px 24px 60px;display:flex;justify-content:center;}
-.sheet{width:794px;max-width:100%;background:white;box-shadow:0 10px 40px rgba(15,23,42,.12);padding:44px 48px;font-family:'Plus Jakarta Sans','Segoe UI',Calibri,Arial,sans-serif;font-size:10.5pt;line-height:1.6;color:#1E293B;border-radius:4px;min-height:300px;}
+.sheet{width:794px;max-width:none;transform-origin:top left;background:white;box-shadow:0 10px 40px rgba(15,23,42,.12);padding:44px 48px;font-family:'Plus Jakarta Sans','Segoe UI',Calibri,Arial,sans-serif;font-size:10.5pt;line-height:1.6;color:#1E293B;border-radius:4px;min-height:300px;}
 .sheet[contenteditable=true]{outline:3px dashed #10B981;outline-offset:6px;}
 .kop{border-bottom:3px double #111;padding-bottom:10px;margin-bottom:14px;text-align:center;}
 .kop .a{font-family:'Bricolage Grotesque','Plus Jakarta Sans',sans-serif;font-weight:800;font-size:14pt;letter-spacing:.3px;}
@@ -73,7 +73,7 @@ ol,ul{padding-left:20px;}
 .modal label{display:block;font-size:.68rem;font-weight:700;color:#475569;margin:10px 0 4px;}
 .modal input{width:100%;padding:9px 11px;border:1.5px solid #E5E3F0;border-radius:10px;font:500 .82rem 'Plus Jakarta Sans';}
 .modal .act{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;}
-@media (max-width:820px){.sheet{padding:22px 16px;font-size:10.5pt;}.top{padding:10px 14px}.tabs,.bar,.stage{padding-left:12px;padding-right:12px}.prog{margin-left:0}}
+@media (max-width:820px){.top{padding:10px 14px}.tabs,.bar,.stage{padding-left:12px;padding-right:12px}.prog{margin-left:0}}
 @media print{
   @page{size:A4;margin:14mm;}
   body{background:white;}
@@ -81,6 +81,13 @@ ol,ul{padding-left:20px;}
   .stage{padding:0;display:block;}
   .sheet{box-shadow:none;width:100%;padding:0;border-radius:0;outline:none!important;}
 }
+.stage{display:block!important;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.fit{margin:0 auto;}
+.zoom{margin-left:auto;display:inline-flex;align-items:center;gap:6px;font-size:.72rem;font-weight:700;color:#64748B;}
+.zoom .btn{padding:8px 12px;}
+#zlabel{min-width:38px;text-align:center;}
+@media (max-width:820px){.zoom{margin-left:0;flex-basis:100%;}}
+@media print{.fit{width:auto!important;height:auto!important;margin:0!important;}.sheet{transform:none!important;width:100%!important;}}
 </style>
 </head>
 <body>
@@ -99,8 +106,9 @@ ol,ul{padding-left:20px;}
   <button class="btn" id="b-edit" onclick="toggleEdit()">✏️ Edit</button>
   <button class="btn" onclick="bukaKop()">⚙️ Data Kop &amp; Tanda Tangan</button>
   <span class="prog" id="prog">0 dari 6 dokumen siap</span>
+  <span class="zoom"><button class="btn" onclick="zoomDok(-1)" aria-label="Perkecil">−</button><span id="zlabel">100%</span><button class="btn" onclick="zoomDok(1)" aria-label="Perbesar">+</button><button class="btn" onclick="zoomDok(0)">Pas layar</button></span>
 </div>
-<div class="stage"><div class="sheet" id="sheet"><div class="state"><b>Memuat dokumen…</b>Mengambil data dari server.</div></div></div>
+<div class="stage"><div class="fit" id="fit"><div class="sheet" id="sheet"><div class="state"><b>Memuat dokumen…</b>Mengambil data dari server.</div></div></div></div>
 <div class="toast" id="toast"></div>
 
 <div class="modal" id="modal-kop">
@@ -123,7 +131,7 @@ const _sb = (typeof supabase !== 'undefined')
   ? supabase.createClient('https://geabugomvgsgemlmxggx.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlYWJ1Z29tdmdzZ2VtbG14Z2d4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYwNzU1NTgsImV4cCI6MjEwMTY1MTU1OH0.1dReCnfV-u45mqo1__AD7NNwjRQUWuPzV3WX1RRliZE') : null;
 
 const HALAMAN = {            // ← nama file halaman; ubah di sini kalau berganti
-  index:     'index.html',
+  index:     'index-v13.html',
   biodata:   'biodata-v6.html',
   dashboard: 'dashboard-v3.html',
   selector:  'cptp-selector-v4.html',
@@ -169,7 +177,7 @@ async function muat() {
       _sb.from('mapel_kelas').select('*').eq('mapel_slug', m).eq('kelas', k).maybeSingle(),
       q('cp').order('urutan'), q('tp').order('urutan'), q('atp').order('urutan'),
       q('rpp'), q('lkpd'), q('kktp'),
-      _sb.from('teachers').select('*').eq('id', uid).maybeSingle(),
+      _sb.rpc('cg_profil_get', { p_passcode: localStorage.getItem('ciptaguru_passcode') }),
     ]);
     for (const r of [mk, cp, tp, atp, rpp, lkpd, kktp]) if (r.error) throw r.error;
     if (!mk.data || !tp.data.length) {
@@ -328,7 +336,7 @@ async function simpanKop() {
   const baru = { satuan_nama: v('k-satuan'), satuan_alamat: v('k-alamat'), kota: v('k-kota'), kepala_nama: v('k-kepala'), kepala_nip: v('k-kepala-nip') };
   try {
     if (!_sb) throw new Error('Tidak terhubung');
-    const { error } = await _sb.from('teachers').update(baru).eq('id', G.id);
+    const { error } = await _sb.rpc('cg_profil_ubah', { p_passcode: localStorage.getItem('ciptaguru_passcode'), p_data: baru });
     if (error) throw error;
   } catch (e) { console.error(e); toast('Gagal menyimpan. Coba lagi.'); return; }
   Object.assign(G, { satuan: baru.satuan_nama || '', alamat: baru.satuan_alamat || '', kota: baru.kota || '', kepala: baru.kepala_nama || '', kepalaNip: baru.kepala_nip || '' });
@@ -336,6 +344,26 @@ async function simpanKop() {
 }
 
 muat();
+
+// ── Tampilan lembar: otomatis pas di lebar layar + tombol zoom ──
+(function () {
+  const W = 794; let z = 1;
+  const fit = document.getElementById('fit'), sheet = document.getElementById('sheet'), stage = fit.parentElement;
+  const lbl = document.getElementById('zlabel');
+  function ukur() {
+    const cs = getComputedStyle(stage);
+    const avail = stage.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    const s = Math.min(1, avail / W) * z;
+    sheet.style.transform = 'scale(' + s + ')';
+    fit.style.width = (W * s) + 'px';
+    fit.style.height = (sheet.offsetHeight * s) + 'px';
+    if (lbl) lbl.textContent = Math.round(s * 100) + '%';
+  }
+  if (window.ResizeObserver) new ResizeObserver(ukur).observe(sheet);
+  window.addEventListener('resize', ukur);
+  window.zoomDok = function (d) { z = d === 0 ? 1 : Math.min(3, Math.max(0.5, z * (d > 0 ? 1.25 : 0.8))); ukur(); };
+  ukur();
+})();
 </script>
 </body>
 </html>

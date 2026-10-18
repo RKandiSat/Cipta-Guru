@@ -671,7 +671,7 @@ html,body{height:100%;overflow:hidden;font-family:'Plus Jakarta Sans',sans-serif
 const sb = (typeof supabase !== 'undefined') ? supabase.createClient('https://geabugomvgsgemlmxggx.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlYWJ1Z29tdmdzZ2VtbG14Z2d4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYwNzU1NTgsImV4cCI6MjEwMTY1MTU1OH0.1dReCnfV-u45mqo1__AD7NNwjRQUWuPzV3WX1RRliZE') : null;
 
 const HALAMAN = {            // ← satu-satunya tempat nama file halaman; ubah di sini kalau nama file berganti
-    index:     'index.html',
+    index:     'index-v13.html',
     biodata:   'biodata-v6.html',
     dashboard: 'dashboard-v3.html',
     selector:  'cptp-selector-v4.html',
@@ -696,11 +696,7 @@ let _userEmail = localStorage.getItem('ciptaguru_user_email') || null;
 
     // Pre-fill form if editing existing biodata
     if (!sb || !_userId) return;
-    const { data: existing } = await sb
-        .from('teachers')
-        .select('*')
-        .eq('id', _userId)
-        .single();
+    const { data: existing } = await sb.rpc('cg_profil_get', { p_passcode: localStorage.getItem('ciptaguru_passcode') });
 
     if (existing) prefillForm(existing);
 })();
@@ -911,9 +907,7 @@ async function handleFotoUpload(event) {
                 .getPublicUrl(fileName);
             const publicUrl = urlData.publicUrl;
 
-            await sb.from('teachers')
-                .update({ foto_profil: publicUrl })
-                .eq('id', userId);
+            await sb.rpc('cg_profil_ubah', { p_passcode: localStorage.getItem('ciptaguru_passcode'), p_data: { foto_profil: publicUrl } });
 
             localStorage.setItem('ciptaguru_photo', publicUrl);
             status.textContent = '✅ Foto berhasil diupload!';
@@ -997,7 +991,7 @@ async function submitData() {
         status_akun: 'Aktif', biodata_complete: true,
     };
 
-    const { error } = await sb.from('teachers').upsert(payload, { onConflict:'id' });
+    const { error } = await sb.rpc('cg_profil_ubah', { p_passcode: localStorage.getItem('ciptaguru_passcode'), p_data: payload });
 
     if (error) {
         console.error(error);

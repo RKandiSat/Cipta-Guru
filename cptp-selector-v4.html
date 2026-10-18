@@ -424,7 +424,7 @@ function bacaPilihanTerakhir() {
     const userId = localStorage.getItem('ciptaguru_user_id');
     if (!userId || !_sb) { if (!_sb) $('info-nik').textContent = '—'; return; }
     try {
-        const { data } = await _sb.from('teachers').select('nik, nama_lengkap, mata_pelajaran, kelas_diajar').eq('id', userId).single();
+        const { data } = await _sb.rpc('cg_profil_get', { p_passcode: localStorage.getItem('ciptaguru_passcode') });
         $('info-nik').textContent = maskNik(data?.nik);
         if (data?.nama_lengkap) $('info-nama').textContent = data.nama_lengkap;
         guruMapel = data?.mata_pelajaran || [];
@@ -437,7 +437,7 @@ function bacaPilihanTerakhir() {
     // Satuan dari biodata (kolom baru; kalau belum ada, diabaikan)
     try {
         if (!$('sel-satuan').value) {
-            const { data } = await _sb.from('teachers').select('satuan_pendidikan').eq('id', userId).single();
+            const { data } = await _sb.rpc('cg_profil_get', { p_passcode: localStorage.getItem('ciptaguru_passcode') });
             if (data?.satuan_pendidikan) { $('sel-satuan').value = data.satuan_pendidikan; cekLengkap(); }
         }
     } catch (e) { /* kolom belum ada: tidak apa-apa */ }
