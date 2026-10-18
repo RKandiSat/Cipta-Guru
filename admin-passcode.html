@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<title>Admin Passcode — Cipta Guru</title>
+<style>
+  :root{--bg:#f4f6fb;--card:#fff;--tx:#1b2438;--mut:#667089;--pri:#2457d6;--pri2:#1b44ab;--ok:#127a43;--warn:#a85d00;--bad:#b3261e;--line:#dde3f0}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;padding:24px 16px 60px}
+  .wrap{max-width:760px;margin:0 auto}
+  h1{font-size:22px;margin:0 0 4px}
+  .sub{color:var(--mut);margin:0 0 18px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px;box-shadow:0 1px 3px rgba(20,30,60,.05)}
+  label{display:block;font-weight:600;margin-bottom:6px}
+  input[type=password],input[type=text],textarea{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;font:inherit;background:#fff;color:var(--tx)}
+  textarea{min-height:150px;resize:vertical}
+  input:focus,textarea:focus{outline:2px solid var(--pri);border-color:transparent}
+  .hint{color:var(--mut);font-size:13px;margin-top:6px}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px}
+  button{font:inherit;font-weight:600;border:0;border-radius:10px;padding:10px 16px;cursor:pointer;background:var(--pri);color:#fff}
+  button:hover{background:var(--pri2)}
+  button.sek{background:#e9eefb;color:var(--pri)}
+  button.sek:hover{background:#dbe4f9}
+  button:disabled{opacity:.55;cursor:not-allowed}
+  .chk{display:flex;gap:8px;align-items:center;font-weight:400;margin:12px 0 0}
+  .chk input{width:auto}
+  table{width:100%;border-collapse:collapse;margin-top:10px;font-size:14px}
+  th,td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--mut);font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+  .pc{font-family:ui-monospace,Consolas,monospace;font-weight:700;font-size:15px;user-select:all;word-break:break-all}
+  .s-ok{color:var(--ok);font-weight:600}.s-warn{color:var(--warn);font-weight:600}
+  .alert{border-radius:10px;padding:10px 12px;margin-top:12px;font-size:14px}
+  .alert.bad{background:#fdecea;color:var(--bad)}
+  .alert.warn{background:#fff4e0;color:var(--warn)}
+  .alert.ok{background:#e6f5ed;color:var(--ok)}
+  .hide{display:none}
+  .tbl{overflow-x:auto}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Admin Passcode</h1>
+  <p class="sub">Buat passcode untuk guru baru. Halaman ini hanya untuk admin — jangan bagikan linknya.</p>
+
+  <div class="card">
+    <label for="kunci">Kunci admin</label>
+    <input type="password" id="kunci" autocomplete="off" placeholder="Tempel kunci admin">
+    <div class="hint">Kunci tidak disimpan di halaman. Setelah menutup atau me-refresh, kamu perlu memasukkannya lagi.</div>
+  </div>
+
+  <div class="card">
+    <label for="nama">Nama lengkap guru (satu nama per baris)</label>
+    <textarea id="nama" placeholder="Contoh:&#10;Siti Aminah, S.Pd&#10;Budi Santoso, S.Pd"></textarea>
+    <div class="hint">Maksimal 60 nama sekali proses. Tulis sesuai nama yang ingin tampil di dashboard guru.</div>
+    <label class="chk"><input type="checkbox" id="ganti"> Kalau nama sudah punya passcode, ganti dengan yang baru</label>
+    <div class="row">
+      <button id="btnBuat">Buat Passcode</button>
+      <button id="btnDaftar" class="sek">Lihat daftar guru</button>
+    </div>
+    <div id="pesan"></div>
+  </div>
+
+  <div class="card hide" id="kartuHasil">
+    <div class="alert warn" id="peringatan">⚠️ Passcode hanya tampil sekali ini. Salin atau unduh sebelum menutup halaman.</div>
+    <div class="tbl"><table id="tbl"><thead><tr><th>Nama</th><th>Passcode</th><th>Status</th></tr></thead><tbody></tbody></table></div>
+    <div class="row" id="aksiHasil">
+      <button id="btnSalin" class="sek">Salin semua</button>
+      <button id="btnCsv" class="sek">Unduh CSV</button>
+    </div>
+  </div>
+
+  <div class="card hide" id="kartuDaftar">
+    <strong>Daftar guru</strong>
+    <div class="tbl"><table id="tblDaftar"><thead><tr><th>Nama</th><th>Akun</th><th>Passcode</th></tr></thead><tbody></tbody></table></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var URL_ = 'https://geabugomvgsgemlmxggx.supabase.co';
+  var KEY_ = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlYWJ1Z29tdmdzZ2VtbG14Z2d4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYwNzU1NTgsImV4cCI6MjEwMTY1MTU1OH0.1dReCnfV-u45mqo1__AD7NNwjRQUWuPzV3WX1RRliZE';
+  var $ = function(i){return document.getElementById(i)};
+  var terakhir = [];
+
+  function pesan(teks, jenis){
+    var d = $('pesan'); d.textContent = '';
+    if(!teks) return;
+    var e = document.createElement('div'); e.className = 'alert ' + (jenis||'bad'); e.textContent = teks; d.appendChild(e);
+  }
+
+  async function rpc(fn, body){
+    var r = await fetch(URL_ + '/rest/v1/rpc/' + fn, {
+      method:'POST',
+      headers:{'apikey':KEY_,'Authorization':'Bearer '+KEY_,'Content-Type':'application/json'},
+      body: JSON.stringify(body)
+    });
+    var j = null; try { j = await r.json(); } catch(e){}
+    if(!r.ok){ throw new Error((j && (j.message||j.hint)) || ('Kesalahan ' + r.status)); }
+    return j;
+  }
+
+  function sel(teks, cls){ var td = document.createElement('td'); if(cls) td.className = cls; td.textContent = teks; return td; }
+
+  function tampilHasil(daftar){
+    terakhir = daftar;
+    var tb = $('tbl').tBodies[0]; tb.textContent = '';
+    var adaPass = false;
+    daftar.forEach(function(x){
+      var tr = document.createElement('tr');
+      tr.appendChild(sel(x.nama));
+      tr.appendChild(sel(x.passcode || '—', x.passcode ? 'pc' : ''));
+      if(x.passcode) adaPass = true;
+      tr.appendChild(sel(x.status, x.passcode ? 's-ok' : 's-warn'));
+      tb.appendChild(tr);
+    });
+    $('kartuHasil').classList.remove('hide');
+    $('aksiHasil').classList.toggle('hide', !adaPass);
+    $('peringatan').classList.toggle('hide', !adaPass);
+    $('kartuHasil').scrollIntoView({behavior:'smooth', block:'start'});
+  }
+
+  $('btnBuat').onclick = async function(){
+    var kunci = $('kunci').value;
+    var nama = $('nama').value.split(/\r?\n/).map(function(s){return s.trim()}).filter(Boolean);
+    $('kartuDaftar').classList.add('hide');
+    if(!kunci){ pesan('Isi kunci admin dulu.'); return; }
+    if(!nama.length){ pesan('Isi minimal satu nama guru.'); return; }
+    if(nama.length > 60){ pesan('Maksimal 60 nama sekali proses. Sekarang ada ' + nama.length + '.'); return; }
+    var b = this; b.disabled = true; b.textContent = 'Memproses…'; pesan('');
+    try{
+      var j = await rpc('cg_admin_web_buat', {p_kunci:kunci, p_nama:nama, p_ganti:$('ganti').checked});
+      if(!j || !j.ok){ pesan((j && j.pesan) || 'Gagal.'); }
+      else {
+        tampilHasil(j.hasil);
+        var n = j.hasil.filter(function(x){return x.passcode}).length;
+        pesan(n + ' passcode dibuat.', n ? 'ok' : 'warn');
+      }
+    }catch(e){ pesan('Gagal: ' + e.message); }
+    b.disabled = false; b.textContent = 'Buat Passcode';
+  };
+
+  $('btnDaftar').onclick = async function(){
+    var kunci = $('kunci').value;
+    if(!kunci){ pesan('Isi kunci admin dulu.'); return; }
+    var b = this; b.disabled = true; pesan('');
+    try{
+      var j = await rpc('cg_admin_web_daftar', {p_kunci:kunci});
+      if(!j || !j.ok){ pesan((j && j.pesan) || 'Gagal.'); }
+      else {
+        var tb = $('tblDaftar').tBodies[0]; tb.textContent = '';
+        j.daftar.forEach(function(x){
+          var tr = document.createElement('tr');
+          tr.appendChild(sel(x.nama));
+          tr.appendChild(sel(x.status || '—'));
+          tr.appendChild(sel(x.passcode ? (x.sementara ? 'ada (lama, belum diganti)' : 'ada') : 'belum ada', x.passcode && !x.sementara ? 's-ok' : 's-warn'));
+          tb.appendChild(tr);
+        });
+        $('kartuHasil').classList.add('hide');
+        $('kartuDaftar').classList.remove('hide');
+      }
+    }catch(e){ pesan('Gagal: ' + e.message); }
+    b.disabled = false;
+  };
+
+  $('btnSalin').onclick = async function(){
+    var teks = terakhir.filter(function(x){return x.passcode}).map(function(x){return x.nama + '\t' + x.passcode}).join('\n');
+    try{ await navigator.clipboard.writeText(teks); pesan('Sudah disalin. Tempel ke catatan pribadi yang aman.', 'ok'); }
+    catch(e){ pesan('Gagal menyalin otomatis. Blok dan salin manual dari tabel.', 'warn'); }
+  };
+
+  $('btnCsv').onclick = function(){
+    function q(s, nama){ s = String(s); if(nama && /^[=+\-@\t\r]/.test(s)) s = "'" + s; return '"' + s.replace(/"/g,'""') + '"'; }
+    var baris = ['nama,passcode'].concat(terakhir.filter(function(x){return x.passcode}).map(function(x){return q(x.nama,true)+','+q(x.passcode,false)}));
+    var blob = new Blob(['﻿' + baris.join('\r\n')], {type:'text/csv;charset=utf-8'});
+    var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'passcode-guru-baru.csv';
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){URL.revokeObjectURL(a.href)}, 1000);
+  };
+})();
+</script>
+</body>
+</html>
