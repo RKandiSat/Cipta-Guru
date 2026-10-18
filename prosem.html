@@ -133,6 +133,18 @@ const HALAMAN = {            // ← nama file halaman; ubah di sini kalau bergan
 };
 if (localStorage.getItem('ciptaguru_logged_in') !== 'true' || !localStorage.getItem('ciptaguru_user_id')) location.href = HALAMAN.index;
 
+// ── KUNCI: biodata wajib lengkap sebelum memakai halaman ini ──
+// Dicek di perangkat (cepat) dan di server (tidak bisa dipalsukan lewat localStorage).
+(function () {
+  const ke = () => { try { localStorage.setItem('ciptaguru_biodata_complete', 'false'); } catch (e) {} location.replace(HALAMAN.biodata); };
+  if (localStorage.getItem('ciptaguru_biodata_complete') !== 'true') { ke(); return; }
+  setTimeout(() => {
+    const pc = localStorage.getItem('ciptaguru_passcode');
+    if (typeof _sb === 'undefined' || !_sb || !pc) return;
+    _sb.rpc('cg_profil_get', { p_passcode: pc }).then(({ data }) => { if (data && data.biodata_complete !== true) ke(); }, () => {});
+  }, 0);
+})();
+
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
 const NAMA_BULAN = ['','Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];

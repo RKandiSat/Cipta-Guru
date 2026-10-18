@@ -319,9 +319,21 @@ const HALAMAN = {            // ← satu-satunya tempat nama file halaman; ubah 
 
 if (localStorage.getItem('ciptaguru_logged_in') !== 'true' || !localStorage.getItem('ciptaguru_user_id')) {
     window.location.href = HALAMAN.index;
-} else {
+} else if (localStorage.getItem('ciptaguru_biodata_complete') === 'true') {
     document.body.style.opacity = '1';
 }
+
+// ── KUNCI: biodata wajib lengkap sebelum memakai halaman ini ──
+// Dicek di perangkat (cepat) dan di server (tidak bisa dipalsukan lewat localStorage).
+(function () {
+  const ke = () => { try { localStorage.setItem('ciptaguru_biodata_complete', 'false'); } catch (e) {} location.replace(HALAMAN.biodata); };
+  if (localStorage.getItem('ciptaguru_biodata_complete') !== 'true') { ke(); return; }
+  setTimeout(() => {
+    const pc = localStorage.getItem('ciptaguru_passcode');
+    if (typeof _sb === 'undefined' || !_sb || !pc) return;
+    _sb.rpc('cg_profil_get', { p_passcode: pc }).then(({ data }) => { if (data && data.biodata_complete !== true) ke(); }, () => {});
+  }, 0);
+})();
 
 // ══════════════ DATA PILIHAN ══════════════
 const AGAMA_VARIAN = [
