@@ -94,7 +94,19 @@ body { display: flex; flex-direction: column; height: 100vh; height: 100dvh; bac
 .progress-label { font-size: 0.72rem; font-weight: 600; color: #64748B; }
 .progress-value { font-size: 0.72rem; font-weight: 700; color: #4F46E5; }
 .progress-track { height: 6px; background: #E5E3F0; border-radius: 99px; overflow: hidden; margin-top: 6px; }
-.progress-fill { height: 100%; background: linear-gradient(90deg, #4F46E5, #7C3AED); border-radius: 99px; }
+.progress-fill { height: 100%; width: 0; background: linear-gradient(90deg, #4F46E5, #7C3AED); border-radius: 99px; transition: width .9s cubic-bezier(.22,1,.36,1); }
+.prog-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.prog-wrap { position: relative; margin: 0 14px; padding: 8px 0; }
+.prog-wrap .progress-track { margin-top: 0; }
+.prog-logo { position: absolute; top: 50%; left: 0; width: 28px; height: 28px; margin: -14px 0 0 -14px; border-radius: 50%; background: #fff; border: 2px solid #7C3AED; box-shadow: 0 2px 8px rgba(79,70,229,.35); display: flex; align-items: center; justify-content: center; font-size: 14px; line-height: 1; transition: left .9s cubic-bezier(.22,1,.36,1); animation: prog-bob 2.4s ease-in-out infinite; }
+.prog-logo.selesai { border-color: #16A34A; animation: prog-pop 1.2s ease-in-out infinite; }
+@keyframes prog-bob { 0%,100% { transform: translateY(0) rotate(-6deg); } 50% { transform: translateY(-3px) rotate(6deg); } }
+@keyframes prog-pop { 0%,100% { transform: scale(1); } 50% { transform: scale(1.18); } }
+.prog-steps { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.prog-step { font-size: 0.66rem; font-weight: 600; color: #94a3b8; background: #F8F7FF; border: 1px solid #E5E3F0; border-radius: 99px; padding: 3px 10px; transition: all .3s; }
+.prog-step.ok { color: #4F46E5; background: #EEF2FF; border-color: #C7D2FE; }
+.prog-step.ok::before { content: "✓ "; }
+@media (prefers-reduced-motion: reduce) { .prog-logo, .progress-fill { transition: none; animation: none; } }
 
 .section-label { font-size: 0.62rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin: 0 2px 10px; }
 
@@ -239,11 +251,15 @@ body { display: flex; flex-direction: column; height: 100vh; height: 100dvh; bac
                 <div class="meta-cell"><div class="meta-label">Status</div><div class="meta-value" id="meta-status">—</div></div>
                 <div class="meta-cell"><div class="meta-label">Role</div><div class="meta-value" id="meta-role">—</div></div>
             </div>
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-                <span class="progress-label">Modul Selesai</span>
-                <span class="progress-value">0 / 6</span>
+            <div class="prog-head">
+                <span class="progress-label">Progres Pemakaian</span>
+                <span class="progress-value" id="prog-val">0 / 6</span>
             </div>
-            <div class="progress-track"><div class="progress-fill" style="width:0%;"></div></div>
+            <div class="prog-wrap">
+                <div class="progress-track"><div class="progress-fill" id="prog-fill"></div></div>
+                <div class="prog-logo" id="prog-logo" aria-hidden="true">🎓</div>
+            </div>
+            <div class="prog-steps" id="prog-steps"></div>
         </div>
 
         <!-- 1 tombol gabungan: menggantikan CP & TP, KKTP, dan Modul Ajar & RPP -->
@@ -402,6 +418,68 @@ const MODULES = {
 })();
 
 // ── NAVIGASI ─────────────────────────────────────────
+// ── PROGRES PEMAKAIAN ────────────────────────────────
+// Satu langkah dihitung selesai saat modulnya dibuka (biodata: saat sudah lengkap).
+// Disimpan di server (per guru, ikut ke semua perangkat) dan dicadangkan di perangkat ini.
+const LANGKAH = [
+    { k: 'biodata', t: 'Biodata' },
+    { k: 'materi',  t: 'CP–KKTP' },
+    { k: 'prosem',  t: 'Prosem' },
+    { k: 'prota',   t: 'Prota' },
+    { k: 'bahan',   t: 'Bahan Ajar' },
+    { k: 'asesmen', t: 'Asesmen' },
+];
+const KUNCI_PROGRES = 'ciptaguru_progres_' + (localStorage.getItem('ciptaguru_user_id') || '');
+const passcodeGuru = () => localStorage.getItem('ciptaguru_passcode');
+let progresServer = null;      // null = belum/tidak bisa dibaca dari server
+
+function progresLokal() {
+    let s = [];
+    try { s = JSON.parse(localStorage.getItem(KUNCI_PROGRES) || '[]'); } catch (e) {}
+    return Array.isArray(s) ? s : [];
+}
+function simpanLokal(s) { try { localStorage.setItem(KUNCI_PROGRES, JSON.stringify(s)); } catch (e) {} }
+function bacaProgres() {
+    const s = new Set([...progresLokal(), ...(progresServer || [])]);
+    if (biodataLengkap()) s.add('biodata');
+    let p = {};
+    try { p = JSON.parse(localStorage.getItem('ciptaguru_bab_pilihan') || '{}'); } catch (e) {}
+    if (p && p.mapel_slug && p.kelas) s.add('materi');
+    return [...s].filter(k => LANGKAH.some(l => l.k === k));
+}
+function tandai(k) {
+    const s = bacaProgres();
+    if (!s.includes(k)) s.push(k);
+    simpanLokal(s);                                   // simpan lokal dulu (aman kalau halaman langsung berpindah)
+    if (_sb && passcodeGuru()) _sb.rpc('cg_progres_tandai', { p_passcode: passcodeGuru(), p_langkah: k }).then(() => {}, () => {});
+}
+// Ambil dari server, gabungkan dengan yang ada di perangkat ini, dan kirim yang belum ada di server.
+async function sinkronProgres() {
+    if (!_sb || !passcodeGuru()) return;
+    try {
+        const { data, error } = await _sb.rpc('cg_progres_get', { p_passcode: passcodeGuru() });
+        if (error || !Array.isArray(data)) return;
+        progresServer = data;
+        const gabung = bacaProgres();
+        simpanLokal(gabung);
+        gambarProgres();
+        for (const k of gabung.filter(k => !data.includes(k))) {
+            await _sb.rpc('cg_progres_tandai', { p_passcode: passcodeGuru(), p_langkah: k });
+        }
+    } catch (e) { console.warn('Progres:', e); }
+}
+function gambarProgres() {
+    const s = bacaProgres(), n = LANGKAH.filter(l => s.includes(l.k)).length, pct = Math.round(n / LANGKAH.length * 100);
+    $('prog-val').textContent = n === LANGKAH.length ? 'Lengkap 🎉' : `${n} / ${LANGKAH.length} langkah`;
+    $('prog-fill').style.width = pct + '%';
+    $('prog-logo').style.left = pct + '%';
+    $('prog-logo').classList.toggle('selesai', n === LANGKAH.length);
+    $('prog-logo').textContent = n === LANGKAH.length ? '🏆' : '🎓';
+    $('prog-steps').innerHTML = LANGKAH.map(l => `<span class="prog-step${s.includes(l.k) ? ' ok' : ''}">${l.t}</span>`).join('');
+}
+requestAnimationFrame(() => setTimeout(() => { gambarProgres(); sinkronProgres(); }, 120));
+window.addEventListener('pageshow', e => { gambarProgres(); if (e.persisted) sinkronProgres(); });
+
 function butuhBiodata() {
     if (biodataLengkap()) return false;
     $('popup-biodata').style.display = 'flex';
@@ -411,12 +489,14 @@ function butuhBiodata() {
 // Tombol gabungan -> halaman pilih materi
 function bukaSelector() {
     if (butuhBiodata()) return;
+    tandai('materi');
     window.location.href = HALAMAN.selector;
 }
 
 // Prosem -> kalau materi sudah dipilih langsung buka, kalau belum pilih materi dulu
 function bukaProsem() {
     if (butuhBiodata()) return;
+    tandai('prosem');
     let p = {};
     try { p = JSON.parse(localStorage.getItem('ciptaguru_bab_pilihan') || '{}'); } catch (e) {}
     window.location.href = (p && p.mapel_slug && p.kelas) ? HALAMAN.prosem : HALAMAN.selector + '?tujuan=prosem';
@@ -424,6 +504,7 @@ function bukaProsem() {
 
 function bukaProta() {
     if (butuhBiodata()) return;
+    tandai('prota');
     let p = {};
     try { p = JSON.parse(localStorage.getItem('ciptaguru_bab_pilihan') || '{}'); } catch (e) {}
     window.location.href = (p && p.mapel_slug && p.kelas) ? HALAMAN.prota : HALAMAN.selector + '?tujuan=prota';
@@ -431,11 +512,13 @@ function bukaProta() {
 
 function bukaBahan() {
     if (butuhBiodata()) return;
+    tandai('bahan');
     window.location.href = HALAMAN.bahan;
 }
 
 function bukaAsesmen() {
     if (butuhBiodata()) return;
+    tandai('asesmen');
     window.location.href = 'https://asesmen.ciptaguru.com/?jenis=formatif';
 }
 
@@ -465,7 +548,10 @@ function goToEditProfil() { window.location.href = HALAMAN.biodata; }
 
 function doLogout() {
     if (confirm('Yakin ingin keluar dari Cipta Guru?')) {
+        const simpan = {};
+        for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k.startsWith('ciptaguru_progres_')) simpan[k] = localStorage.getItem(k); }
         localStorage.clear();
+        Object.entries(simpan).forEach(([k, v]) => localStorage.setItem(k, v));
         window.location.href = HALAMAN.index;
     }
 }
@@ -490,7 +576,7 @@ function setAvatarPhoto(src) {
     const userId = localStorage.getItem('ciptaguru_user_id');
     if (!userId || !_sb) return;
     try {
-        const { data } = await _sb.from('teachers').select('foto_profil').eq('id', userId).single();
+        const { data } = await _sb.rpc('cg_profil_get', { p_passcode: localStorage.getItem('ciptaguru_passcode') });
         if (data?.foto_profil) {
             localStorage.setItem('ciptaguru_photo', data.foto_profil);
             setAvatarPhoto(data.foto_profil);
