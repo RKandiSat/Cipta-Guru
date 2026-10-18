@@ -25,14 +25,21 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#F8F7FF;color:#0F172A
 .tab.active{border-color:var(--c);background:var(--bg);box-shadow:0 6px 18px rgba(79,70,229,.14);}
 .tab .ck{margin-left:auto;font-size:.8rem;display:none;}
 .tab.done .ck{display:block;}
-.bar{max-width:1000px;margin:14px auto 0;padding:0 24px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.bar{max-width:1000px;margin:14px auto 0;padding:0 24px;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:14px;}
+.bar .grp{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.bar .grp.tengah{justify-content:center;}
+.bar .grp.kanan{justify-content:flex-end;}
 .btn{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:11px;border:1.5px solid #E5E3F0;background:white;font:700 .76rem 'Plus Jakarta Sans';color:#374151;cursor:pointer;transition:all .18s;}
 .btn:hover{border-color:#818CF8;color:#4F46E5;background:#EEF2FF;}
 .btn.pri{background:linear-gradient(135deg,#4F46E5,#7C3AED);color:white;border:none;box-shadow:0 4px 14px rgba(79,70,229,.35);}
 .btn.pri:hover{color:white;transform:translateY(-1px);}
 .btn[disabled]{opacity:.4;cursor:not-allowed;pointer-events:none;}
 .btn.on{background:#ECFDF5;border-color:#10B981;color:#047857;}
-.prog{margin-left:auto;font-size:.72rem;font-weight:700;color:#4F46E5;background:#EEF2FF;border:1px solid #C7D2FE;border-radius:20px;padding:6px 14px;}
+.prog{min-width:190px;text-align:center;font-size:.72rem;font-weight:700;color:#4F46E5;background:#EEF2FF;border:1px solid #C7D2FE;border-radius:14px;padding:7px 16px 8px;}
+.prog .trk{height:5px;border-radius:99px;background:#DDD6FE;overflow:hidden;margin-top:6px;}
+.prog .fl{height:100%;width:0;background:linear-gradient(90deg,#4F46E5,#7C3AED);border-radius:99px;transition:width .5s ease;}
+.prog.penuh{background:#ECFDF5;border-color:#6EE7B7;color:#047857;}
+.prog.penuh .fl{background:#10B981;}
 .stage{padding:18px 24px 60px;display:flex;justify-content:center;}
 .sheet{width:794px;max-width:none;transform-origin:top left;background:white;box-shadow:0 10px 40px rgba(15,23,42,.12);padding:44px 48px;font-family:'Plus Jakarta Sans','Segoe UI',Calibri,Arial,sans-serif;font-size:10.5pt;line-height:1.6;color:#1E293B;border-radius:4px;min-height:300px;}
 .sheet[contenteditable=true]{outline:3px dashed #10B981;outline-offset:6px;}
@@ -73,7 +80,7 @@ ol,ul{padding-left:20px;}
 .modal label{display:block;font-size:.68rem;font-weight:700;color:#475569;margin:10px 0 4px;}
 .modal input{width:100%;padding:9px 11px;border:1.5px solid #E5E3F0;border-radius:10px;font:500 .82rem 'Plus Jakarta Sans';}
 .modal .act{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;}
-@media (max-width:820px){.top{padding:10px 14px}.tabs,.bar,.stage{padding-left:12px;padding-right:12px}.prog{margin-left:0}}
+@media (max-width:820px){.top{padding:10px 14px}.tabs,.bar,.stage{padding-left:12px;padding-right:12px}.bar{grid-template-columns:1fr;gap:10px}.bar .grp,.bar .grp.kanan{justify-content:center}}
 @media print{
   @page{size:A4;margin:14mm;}
   body{background:white;}
@@ -83,10 +90,10 @@ ol,ul{padding-left:20px;}
 }
 .stage{display:block!important;overflow-x:auto;-webkit-overflow-scrolling:touch;}
 .fit{margin:0 auto;}
-.zoom{margin-left:auto;display:inline-flex;align-items:center;gap:6px;font-size:.72rem;font-weight:700;color:#64748B;}
+.zoom{display:inline-flex;align-items:center;gap:6px;font-size:.72rem;font-weight:700;color:#64748B;}
+.zoom #zlabel{min-width:42px;text-align:center;}
 .zoom .btn{padding:8px 12px;}
 #zlabel{min-width:38px;text-align:center;}
-@media (max-width:820px){.zoom{margin-left:0;flex-basis:100%;}}
 @media print{.fit{width:auto!important;height:auto!important;margin:0!important;}.sheet{transform:none!important;width:100%!important;}}
 </style>
 </head>
@@ -100,11 +107,13 @@ ol,ul{padding-left:20px;}
 
 <div class="tabs" id="tabs"></div>
 <div class="bar">
-  <button class="btn pri" onclick="unduh('pdf')">⬇ PDF / Cetak</button>
-  <button class="btn" id="b-edit" onclick="toggleEdit()">✏️ Edit</button>
-  <button class="btn" onclick="bukaKop()">⚙️ Data Kop &amp; Tanda Tangan</button>
-  <span class="prog" id="prog">0 dari 6 dokumen siap</span>
-  <span class="zoom"><button class="btn" onclick="zoomDok(-1)" aria-label="Perkecil">−</button><span id="zlabel">100%</span><button class="btn" onclick="zoomDok(1)" aria-label="Perbesar">+</button><button class="btn" onclick="zoomDok(0)">Pas layar</button></span>
+  <div class="grp kiri">
+    <button class="btn pri" onclick="unduh('pdf')">⬇ PDF / Cetak</button>
+    <button class="btn" id="b-edit" onclick="toggleEdit()">✏️ Edit</button>
+    <button class="btn" onclick="bukaKop()">⚙️ Data Kop &amp; Tanda Tangan</button>
+  </div>
+  <div class="grp tengah"><div class="prog" id="prog"><span id="prog-teks">0 dari 6 dokumen siap</span><div class="trk"><div class="fl" id="prog-fl"></div></div></div></div>
+  <div class="grp kanan"><span class="zoom"><button class="btn" onclick="zoomDok(-1)" aria-label="Perkecil">−</button><span id="zlabel">100%</span><button class="btn" onclick="zoomDok(1)" aria-label="Perbesar">+</button><button class="btn" onclick="zoomDok(0)">Pas layar</button></span></div>
 </div>
 <div class="stage"><div class="fit" id="fit"><div class="sheet" id="sheet"><div class="state"><b>Memuat dokumen…</b>Mengambil data dari server.</div></div></div></div>
 <div class="toast" id="toast"></div>
@@ -134,6 +143,18 @@ const HALAMAN = {            // ← nama file halaman; ubah di sini kalau bergan
   selector:  'cptp-selector-v4.html',
 };
 if (localStorage.getItem('ciptaguru_logged_in') !== 'true' || !localStorage.getItem('ciptaguru_user_id')) location.href = HALAMAN.index;
+
+// ── KUNCI: biodata wajib lengkap sebelum memakai halaman ini ──
+// Dicek di perangkat (cepat) dan di server (tidak bisa dipalsukan lewat localStorage).
+(function () {
+  const ke = () => { try { localStorage.setItem('ciptaguru_biodata_complete', 'false'); } catch (e) {} location.replace(HALAMAN.biodata); };
+  if (localStorage.getItem('ciptaguru_biodata_complete') !== 'true') { ke(); return; }
+  setTimeout(() => {
+    const pc = localStorage.getItem('ciptaguru_passcode');
+    if (typeof _sb === 'undefined' || !_sb || !pc) return;
+    _sb.rpc('cg_profil_get', { p_passcode: pc }).then(({ data }) => { if (data && data.biodata_complete !== true) ke(); }, () => {});
+  }, 0);
+})();
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
@@ -196,7 +217,8 @@ async function muat() {
   babNo = babs.some(b => b[0] === +pilihan.bab_no) ? +pilihan.bab_no : babs[0][0];
   $('bab').innerHTML = babs.map(([n, j]) => `<option value="${n}">Bab ${n}: ${esc(j)}</option>`).join('');
   $('bab').value = babNo;
-  $('bab').onchange = e => { babNo = +e.target.value; render(); };
+  muatSelesai();
+  $('bab').onchange = e => { babNo = +e.target.value; muatSelesai(); render(); };
   $('ctx-title').textContent = `${D.meta.nama} — Kelas ${D.meta.kelas}`;
   $('ctx-sub').textContent = `Paket ${D.meta.paket} · Fase ${D.meta.fase} · Tahun Ajaran ${TAHUN}`;
   document.title = `Cipta Guru — ${D.meta.nama_pendek || D.meta.nama} Kelas ${D.meta.kelas}`;
@@ -211,7 +233,10 @@ function renderTabs() {
       <div class="ic" style="background:${t.bg}">${t.ic}</div>
       <div><div class="nm">${t.nm}</div><div class="sb">${t.sb}</div></div><span class="ck">✅</span>
     </button>`).join('');
-  $('prog').textContent = `${selesai.size} dari 6 dokumen siap` + (selesai.size === 6 ? ' 🎉' : '');
+  $('prog-teks').textContent = `${selesai.size} dari 6 dokumen siap` + (selesai.size === 6 ? ' 🎉' : '');
+  $('prog-fl').style.width = (selesai.size / 6 * 100) + '%';
+  $('prog').classList.toggle('penuh', selesai.size === 6);
+  const kb = document.querySelector('.bab'); if (kb) kb.style.display = (aktif === 'cp') ? 'none' : '';   // CP berlaku untuk seluruh mapel/kelas, tidak per bab
 }
 function pilih(id) { aktif = id; if (edit) toggleEdit(); render(); }
 
@@ -287,14 +312,29 @@ const VIEW = {
      <div class="ttd"><div>Paraf Orang Tua / Pendamping<div class="sp"></div>(........................)</div><div>Nilai / Catatan Guru<div class="sp"></div>(........................)</div></div>`;
   },
 };
-function render() { if (!D) return; renderTabs(); $('sheet').innerHTML = VIEW[aktif](); }
+// ── Penanda "dokumen siap": otomatis bertambah saat sebuah dokumen dibuka; tersimpan per bab di perangkat ──
+const kunciSelesai = () => `ciptaguru_dok_${localStorage.getItem('ciptaguru_user_id')}_${pilihan.mapel_slug}_${pilihan.kelas}_${babNo}`;
+function muatSelesai() { try { selesai = new Set(JSON.parse(localStorage.getItem(kunciSelesai()) || '[]')); } catch (e) { selesai = new Set(); } }
+function simpanSelesai() { try { localStorage.setItem(kunciSelesai(), JSON.stringify([...selesai])); } catch (e) {} }
+function render() {
+  if (!D) return;
+  const baru = !selesai.has(aktif);
+  if (baru) { selesai.add(aktif); simpanSelesai(); }
+  renderTabs(); $('sheet').innerHTML = VIEW[aktif]();
+  if (baru && selesai.size === 6) selamat(); 
+}
 
 // ── Aksi ─────────────────────────────────────────
 function toast(m) { const t = $('toast'); t.textContent = m; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2200); }
+function selamat() {
+  for (let i = 0; i < 26; i++) { const c = document.createElement('div'); c.className = 'confetti'; c.textContent = ['🎉','⭐','📘','✨','🎈'][i % 5]; c.style.left = Math.random() * 100 + 'vw'; c.style.animationDelay = Math.random() * .8 + 's'; document.body.appendChild(c); setTimeout(() => c.remove(), 3500); }
+  toast('Keenam dokumen siap — hebat! 🎉');
+}
 function tandaiSelesai() {
-  selesai.add(aktif); renderTabs();
-  if (selesai.size === 6) { for (let i = 0; i < 26; i++) { const c = document.createElement('div'); c.className = 'confetti'; c.textContent = ['🎉','⭐','📘','✨','🎈'][i % 5]; c.style.left = Math.random() * 100 + 'vw'; c.style.animationDelay = Math.random() * .8 + 's'; document.body.appendChild(c); setTimeout(() => c.remove(), 3500); } toast('Keenam dokumen siap — hebat! 🎉'); }
-  else toast('Dokumen ditandai siap ✅');
+  const baru = !selesai.has(aktif);
+  selesai.add(aktif); simpanSelesai(); renderTabs();
+  if (selesai.size === 6 && baru) selamat();
+  else if (baru) toast('Dokumen ditandai siap ✅');
 }
 function namaBerkas(ext) { const mp = (D.meta.nama_pendek || D.meta.mapel_slug).replace(/[^\w]+/g, '_'); return `${aktif.toUpperCase()}_${mp}_Kelas${D.meta.kelas}${['cp','tp','atp'].includes(aktif)?'':'_Bab'+babNo}.${ext}`; }
 function unduh(jenis) {
