@@ -101,8 +101,6 @@ ol,ul{padding-left:20px;}
 <div class="tabs" id="tabs"></div>
 <div class="bar">
   <button class="btn pri" onclick="unduh('pdf')">⬇ PDF / Cetak</button>
-  <button class="btn" onclick="unduh('doc')">📄 Word</button>
-  <button class="btn" id="b-xls" onclick="unduh('xls')">📊 Excel</button>
   <button class="btn" id="b-edit" onclick="toggleEdit()">✏️ Edit</button>
   <button class="btn" onclick="bukaKop()">⚙️ Data Kop &amp; Tanda Tangan</button>
   <span class="prog" id="prog">0 dari 6 dokumen siap</span>
@@ -125,7 +123,6 @@ ol,ul{padding-left:20px;}
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
 const _sb = (typeof supabase !== 'undefined')
   ? supabase.createClient('https://geabugomvgsgemlmxggx.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlYWJ1Z29tdmdzZ2VtbG14Z2d4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYwNzU1NTgsImV4cCI6MjEwMTY1MTU1OH0.1dReCnfV-u45mqo1__AD7NNwjRQUWuPzV3WX1RRliZE') : null;
@@ -215,8 +212,6 @@ function renderTabs() {
       <div><div class="nm">${t.nm}</div><div class="sb">${t.sb}</div></div><span class="ck">✅</span>
     </button>`).join('');
   $('prog').textContent = `${selesai.size} dari 6 dokumen siap` + (selesai.size === 6 ? ' 🎉' : '');
-  $('b-xls').disabled = !TABS.find(t => t.id === aktif).tabel;
-  $('b-xls').title = $('b-xls').disabled ? 'Dokumen ini berupa teks, bukan tabel — gunakan PDF atau Word' : '';
 }
 function pilih(id) { aktif = id; if (edit) toggleEdit(); render(); }
 
@@ -306,15 +301,6 @@ function unduh(jenis) {
   if (!D) return;
   if (edit) toggleEdit();
   if (jenis === 'pdf') { toast('Di jendela cetak, pilih “Simpan sebagai PDF”'); setTimeout(() => { window.print(); tandaiSelesai(); }, 400); return; }
-  if (jenis === 'doc') {
-    const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"><style>body{font-family:Calibri,Arial,sans-serif;font-size:11pt}table.data{border-collapse:collapse;width:100%}table.data th,table.data td{border:1px solid #000;padding:4px;vertical-align:top}.kop{text-align:center;border-bottom:3px double #000}.doc-title{text-align:center;font-weight:bold}.doc-sub{text-align:center}.note-gen{display:none}.lines div{border-bottom:1px dotted #555;height:22px}</style></head><body>${$('sheet').innerHTML}</body></html>`;
-    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['﻿', html], {type:'application/msword'})); a.download = namaBerkas('doc'); a.click(); tandaiSelesai(); return;
-  }
-  if (jenis === 'xls') {
-    if (typeof XLSX === 'undefined') { toast('Pustaka Excel gagal dimuat (cek internet)'); return; }
-    const tbl = $('sheet').querySelector('table.data'); if (!tbl) return;
-    XLSX.writeFile(XLSX.utils.table_to_book(tbl, {sheet: aktif.toUpperCase()}), namaBerkas('xlsx')); tandaiSelesai();
-  }
 }
 function toggleEdit() {
   if (!D) return;
