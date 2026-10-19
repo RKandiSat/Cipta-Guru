@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="1 0 62 62">
+  <polygon points="32,3 59,22 49,59 15,59 5,22" fill="#1F5FE0" stroke="#1F5FE0" stroke-width="4" stroke-linejoin="round"/>
+  <polygon points="32,9 53,24.5 45.5,54 18.5,54 11,24.5" fill="#FFD21F" stroke="#FFD21F" stroke-width="3" stroke-linejoin="round"/>
+  <polygon points="32.0,13.5 34.1,19.1 40.1,19.4 35.4,23.1 37.0,28.9 32.0,25.6 27.0,28.9 28.6,23.1 23.9,19.4 29.9,19.1" fill="#F58A1F" stroke="#F58A1F" stroke-width="1" stroke-linejoin="round"/>
+  <path d="M32 50 V35 Q25 31.5 18 34 V48 Q25 46 32 50 Z" fill="#fff" stroke="#1F5FE0" stroke-width="2.4" stroke-linejoin="round"/>
+  <path d="M32 50 V35 Q39 31.5 46 34 V48 Q39 46 32 50 Z" fill="#fff" stroke="#1F5FE0" stroke-width="2.4" stroke-linejoin="round"/>
+</svg>

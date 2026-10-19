@@ -33,6 +33,9 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#F8F7FF;color:#0F172A
 .state b{display:block;font-size:1.05rem;color:#0F172A;margin-bottom:6px;}
 .btn{display:inline-flex;margin-top:12px;padding:9px 15px;border-radius:11px;border:1.5px solid #E5E3F0;background:white;font:700 .76rem 'Plus Jakarta Sans';color:#374151;cursor:pointer;}
 </style>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 </head>
 <body>
 <div class="top">
@@ -41,15 +44,27 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#F8F7FF;color:#0F172A
 </div>
 <div class="wrap">
   <p class="intro">Kumpulan tautan buku elektronik resmi dari pemerintah. Cari atau saring berdasarkan kelas dan mata pelajaran, lalu klik kartu untuk membuka bukunya di tab baru.</p>
-  <div class="filt"><input id="q" placeholder="🔍 Cari judul buku…"><select id="f-kelas"></select><select id="f-mapel"></select><select id="f-jenis"></select></div>
+  <div class="filt"><input id="q" placeholder="🔍 Cari judul buku…"><select id="f-kelas"></select><select id="f-mapel"></select></div>
   <div id="isi"><div class="state"><b>Memuat…</b>Mengambil daftar buku.</div></div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const _sb = (typeof supabase !== 'undefined') ? supabase.createClient('https://geabugomvgsgemlmxggx.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlYWJ1Z29tdmdzZ2VtbG14Z2d4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYwNzU1NTgsImV4cCI6MjEwMTY1MTU1OH0.1dReCnfV-u45mqo1__AD7NNwjRQUWuPzV3WX1RRliZE') : null;
-const HALAMAN = { index:'index.html', dashboard:'dashboard-v3.html' };
+const HALAMAN = { index:'index.html', dashboard:'dashboard-v3.html', biodata:'biodata-v6.html' };
 if (localStorage.getItem('ciptaguru_logged_in') !== 'true' || !localStorage.getItem('ciptaguru_user_id')) location.href = HALAMAN.index;
+
+// ── KUNCI: biodata wajib lengkap sebelum memakai halaman ini ──
+// Dicek di perangkat (cepat) dan di server (tidak bisa dipalsukan lewat localStorage).
+(function () {
+  const ke = () => { try { localStorage.setItem('ciptaguru_biodata_complete', 'false'); } catch (e) {} location.replace(HALAMAN.dashboard); };
+  if (localStorage.getItem('ciptaguru_biodata_complete') !== 'true') { ke(); return; }
+  setTimeout(() => {
+    const pc = localStorage.getItem('ciptaguru_passcode');
+    if (typeof _sb === 'undefined' || !_sb || !pc) return;
+    _sb.rpc('cg_profil_get', { p_passcode: pc }).then(({ data }) => { if (data && data.biodata_complete !== true) ke(); }, () => {});
+  }, 0);
+})();
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -69,8 +84,8 @@ function kartu(b){
 let SEMUA=[];
 const opsi=(id,label,vals)=>{const el=$(id);const cur=el.value;el.innerHTML=`<option value="">${label}</option>`+vals.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join('');el.value=cur;};
 function tampil(){
-  const q=$('q').value.trim().toLowerCase(), k=$('f-kelas').value, m=$('f-mapel').value, j=$('f-jenis').value;
-  const hasil=SEMUA.filter(b=>(!q||(b.judul+' '+(b.mapel||'')).toLowerCase().includes(q))&&(!k||String(b.kelas??'')===k)&&(!m||b.mapel===m)&&(!j||b.jenis===j));
+  const q=$('q').value.trim().toLowerCase(), k=$('f-kelas').value, m=$('f-mapel').value;
+  const hasil=SEMUA.filter(b=>(!q||(b.judul+' '+(b.mapel||'')).toLowerCase().includes(q))&&(!k||String(b.kelas??'')===k)&&(!m||b.mapel===m));
   if(!hasil.length){$('isi').innerHTML='<div class="state"><b>Tidak ada buku</b>Coba ubah kata kunci atau filter.</div>';return;}
   const grup={};hasil.forEach(b=>{const key=(b.mapel||'Lainnya')+(b.kelas?` — Kelas ${b.kelas}`:'');(grup[key]=grup[key]||[]).push(b);});
   $('isi').innerHTML=Object.keys(grup).map(g=>`<div class="sec">${esc(g)}</div><div class="grid">${grup[g].map(kartu).join('')}</div>`).join('');
@@ -84,8 +99,7 @@ function tampil(){
   const uniq=a=>[...new Set(a.filter(x=>x!==null&&x!==''&&x!==undefined))];
   opsi('f-kelas','Semua kelas',uniq(SEMUA.map(b=>b.kelas)).sort((a,b)=>a-b).map(String));
   opsi('f-mapel','Semua mapel',uniq(SEMUA.map(b=>b.mapel)).sort());
-  opsi('f-jenis','Semua jenis',uniq(SEMUA.map(b=>b.jenis)).sort());
-  ['q','f-kelas','f-mapel','f-jenis'].forEach(i=>$(i).addEventListener(i==='q'?'input':'change',tampil));
+  ['q','f-kelas','f-mapel'].forEach(i=>$(i).addEventListener(i==='q'?'input':'change',tampil));
   tampil();
 })();
 </script>

@@ -96,6 +96,9 @@ ol,ul{padding-left:20px;}
 #zlabel{min-width:38px;text-align:center;}
 @media print{.fit{width:auto!important;height:auto!important;margin:0!important;}.sheet{transform:none!important;width:100%!important;}}
 </style>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 </head>
 <body>
 <div class="top">
@@ -252,7 +255,7 @@ const babs0 = () => babList();
 const tpBab = () => D.tp.filter(t => t.bab_no === babNo);
 const atpBab = () => D.atp.find(a => a.bab_no === babNo) || {};
 const catatanDraf = msg => `<div class="note-gen">${msg}</div>`;
-const adaDraf = () => Object.values(D.rpp).concat(Object.values(D.lkpd), Object.values(D.kktp)).some(r => r.sumber === 'draf-claude');
+const adaDraf = () => Object.values(D.rpp).concat(Object.values(D.lkpd), Object.values(D.kktp)).some(r => String(r.sumber || '').startsWith('draf'));
 const DRAF = 'Isi dokumen ini adalah <b>draf awal</b>. Periksa dan sesuaikan dengan buku, kondisi kelas, dan peserta didikmu (tombol ✏️ Edit).';
 
 const VIEW = {
