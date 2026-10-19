@@ -38,9 +38,6 @@
   .hide{display:none}
   .tbl{overflow-x:auto}
 </style>
-<link rel="icon" href="favicon.svg" type="image/svg+xml">
-<link rel="icon" href="favicon.ico" sizes="any">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
 </head>
 <body>
 <div class="wrap">
@@ -61,6 +58,7 @@
     <div class="row">
       <button id="btnBuat">Buat Passcode</button>
       <button id="btnDaftar" class="sek">Lihat daftar guru</button>
+      <button id="btnLihat" class="sek">🔑 Lihat daftar nama dan passcode</button>
     </div>
     <div id="pesan"></div>
   </div>
@@ -71,6 +69,16 @@
     <div class="row" id="aksiHasil">
       <button id="btnSalin" class="sek">Salin semua</button>
       <button id="btnCsv" class="sek">Unduh CSV</button>
+    </div>
+  </div>
+
+  <div class="card hide" id="kartuLihat">
+    <div class="alert warn">⚠️ Daftar ini rahasia. Tutup setelah selesai (otomatis tertutup dalam 2 menit). Passcode yang tampil "belum tersimpan" berarti dibuat sebelum fitur ini ada: buat ulang dengan centang "ganti".</div>
+    <div class="tbl"><table id="tblLihat"><thead><tr><th>Nama</th><th>Passcode</th><th>Dibuat/diganti</th></tr></thead><tbody></tbody></table></div>
+    <div class="row">
+      <button id="btnSalinL" class="sek">Salin semua</button>
+      <button id="btnCsvL" class="sek">Unduh CSV</button>
+      <button id="btnTutupL" class="sek">Tutup daftar</button>
     </div>
   </div>
 
@@ -127,7 +135,7 @@
   $('btnBuat').onclick = async function(){
     var kunci = $('kunci').value;
     var nama = $('nama').value.split(/\r?\n/).map(function(s){return s.trim()}).filter(Boolean);
-    $('kartuDaftar').classList.add('hide');
+    $('kartuDaftar').classList.add('hide'); $('kartuLihat').classList.add('hide');
     if(!kunci){ pesan('Isi kunci admin dulu.'); return; }
     if(!nama.length){ pesan('Isi minimal satu nama guru.'); return; }
     if(nama.length > 60){ pesan('Maksimal 60 nama sekali proses. Sekarang ada ' + nama.length + '.'); return; }
@@ -178,6 +186,47 @@
     var baris = ['nama,passcode'].concat(terakhir.filter(function(x){return x.passcode}).map(function(x){return q(x.nama,true)+','+q(x.passcode,false)}));
     var blob = new Blob(['﻿' + baris.join('\r\n')], {type:'text/csv;charset=utf-8'});
     var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'passcode-guru-baru.csv';
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){URL.revokeObjectURL(a.href)}, 1000);
+  };
+  var daftarL = [], timerL = null;
+  function tutupL(){ daftarL = []; $('tblLihat').tBodies[0].textContent = ''; $('kartuLihat').classList.add('hide'); clearTimeout(timerL); }
+  $('btnTutupL').onclick = tutupL;
+  $('btnLihat').onclick = async function(){
+    var kunci = $('kunci').value;
+    if(!kunci){ pesan('Isi kunci admin dulu.'); return; }
+    var b = this; b.disabled = true; pesan('');
+    try{
+      var j = await rpc('cg_admin_web_lihat', {p_kunci:kunci});
+      if(!j || !j.ok){ pesan((j && j.pesan) || 'Gagal.'); }
+      else {
+        daftarL = j.daftar;
+        var tb = $('tblLihat').tBodies[0]; tb.textContent = '';
+        j.daftar.forEach(function(x){
+          var tr = document.createElement('tr');
+          tr.appendChild(sel(x.nama));
+          if(x.passcode) tr.appendChild(sel(x.passcode, 'pc'));
+          else tr.appendChild(sel(x.ada ? 'belum tersimpan, buat ulang' : 'belum punya passcode', 's-warn'));
+          tr.appendChild(sel(x.diubah ? new Date(x.diubah).toLocaleDateString('id-ID') : '—'));
+          tb.appendChild(tr);
+        });
+        $('kartuHasil').classList.add('hide'); $('kartuDaftar').classList.add('hide');
+        $('kartuLihat').classList.remove('hide');
+        $('kartuLihat').scrollIntoView({behavior:'smooth', block:'start'});
+        clearTimeout(timerL); timerL = setTimeout(tutupL, 120000);
+      }
+    }catch(e){ pesan('Gagal: ' + e.message); }
+    b.disabled = false;
+  };
+  $('btnSalinL').onclick = async function(){
+    var teks = daftarL.filter(function(x){return x.passcode}).map(function(x){return x.nama + '\t' + x.passcode}).join('\n');
+    try{ await navigator.clipboard.writeText(teks); pesan('Sudah disalin. Tempel ke catatan pribadi yang aman.', 'ok'); }
+    catch(e){ pesan('Gagal menyalin otomatis. Blok dan salin manual dari tabel.', 'warn'); }
+  };
+  $('btnCsvL').onclick = function(){
+    function q(s, nama){ s = String(s); if(nama && /^[=+\-@\t\r]/.test(s)) s = "'" + s; return '"' + s.replace(/"/g,'""') + '"'; }
+    var baris = ['nama,passcode'].concat(daftarL.filter(function(x){return x.passcode}).map(function(x){return q(x.nama,true)+','+q(x.passcode,false)}));
+    var blob = new Blob(['\ufeff' + baris.join('\r\n')], {type:'text/csv;charset=utf-8'});
+    var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'daftar-passcode-guru.csv';
     document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){URL.revokeObjectURL(a.href)}, 1000);
   };
 })();
