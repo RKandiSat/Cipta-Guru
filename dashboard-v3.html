@@ -335,6 +335,12 @@ body { display: flex; flex-direction: column; height: 100vh; height: 100dvh; bac
                 <div class="module-body"><div class="module-title">Asesmen</div><div class="module-sub">Formatif, sumatif, akhir jenjang &amp; akhir tahun</div></div>
                 <div class="module-arrow">→</div>
             </div>
+
+            <div class="module-btn gated" onclick="bukaTryout()">
+                <div class="module-icon" style="background:linear-gradient(135deg,#ECFDF5,#A7F3D0);">🎯</div>
+                <div class="module-body"><div class="module-title">Tryout</div><div class="module-sub">Latihan HOTS sebelum akhir jenjang &amp; akhir tahun</div></div>
+                <div class="module-arrow">→</div>
+            </div>
         </div>
     </div>
 
@@ -558,6 +564,11 @@ function bukaAsesmen() {
     if (butuhBiodata()) return;
     tandai('asesmen');
     window.location.href = 'https://asesmen.ciptaguru.com/?jenis=formatif';
+}
+
+function bukaTryout() {
+    if (butuhBiodata()) return;
+    window.location.href = 'https://tryout.ciptaguru.com/';
 }
 
 function showModule(id) {
